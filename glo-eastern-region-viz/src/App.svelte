@@ -2,9 +2,8 @@
   import "mapbox-gl/src/css/mapbox-gl.css";
   import mapbox from "mapbox-gl";
   import { onMount } from "svelte";
+  import { MAPBOX_ACCESS_TOKEN } from "./config";
 
-  const MAPBOX_ACCESS_TOKEN =
-    "pk.eyJ1Ijoib3BlbnNvdXJjZXJlciIsImEiOiJja3lsbzNveHAwbndkMnZwZXYxeWxnM3pzIn0.BD4akCoe1u4dg7gcl3J4cQ";
   mapbox.accessToken = MAPBOX_ACCESS_TOKEN;
 
   let map: mapbox.Map | undefined = undefined;
@@ -12,7 +11,7 @@
   onMount(async () => {
     map = new mapbox.Map({
       container: "map",
-      style: "mapbox://styles/mapbox/light-v10",
+      style: "mapbox://styles/mapbox/dark-v10",
       center: [-94.4, 30],
       zoom: 8,
     });
