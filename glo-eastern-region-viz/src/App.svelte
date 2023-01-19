@@ -1,6 +1,7 @@
 <script lang="ts">
   import "mapbox-gl/src/css/mapbox-gl.css";
   import "mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+  import "material-icons/iconfont/material-icons.css";
   import mapboxgl from "mapbox-gl";
   import MapboxGeocoder from "mapbox-gl-geocoder";
   import { onMount } from "svelte";
@@ -24,8 +25,8 @@
       map.addControl(
         new MapboxGeocoder({
           accessToken: MAPBOX_ACCESS_TOKEN,
-        }), 
-        "top-right",
+        }),
+        "top-right"
       );
 
       popup = new mapboxgl.Popup({
@@ -38,11 +39,16 @@
 </script>
 
 <div class="h-screen w-screen flex flex-col">
-  <nav class="absolute flex flex-row py-2 top-2 left-4 z-10">
-    <h1 class="font-extrabold text-xl text-fuchsia-700">GLO Eastern Region Visualizer | RPS</h1>
+  <!-- svelte-ignore a11y-click-events-have-key-events -->
+  <nav
+    class="absolute flex flex-row items-center align-middle p-2 bg-white bg-opacity-50 rounded-md top-16 md:top-2 left-4 z-10 cursor-pointer"
+    on:click={() => console.log("test")}
+  >
+    <span class="material-icons pr-4">layers</span>
+    <h1 class="font-extrabold text-xl">GLO Eastern Region</h1>
   </nav>
 
-  <main class="flex-1 flex-col absolute top-0 bottom-0 left-0 right-0">
+  <main class="flex-1 flex-col h-full w-full">
     <div id="map" class="h-full w-full" />
   </main>
 </div>
