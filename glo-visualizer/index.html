@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GLO Eastern Region</title>
+  </head>
+  <body>
+    <div id="map"></div>
+    <pre id="info"><h1>Flood Risk Assessment Visualization</h1>
+        <h2>GLO Eastern Region</h2>
+        <!-- <a id="title" href="https://www.nrdc.org/resources/losing-ground-severe-repetitive-flooding-united-states">Severe Repetitive Loss data source</a> -->
+    </pre>
+    <div id="menu">
+        <!-- See a list of Mapbox-hosted public styles at -->
+        <!-- https://docs.mapbox.com/api/maps/styles/#mapbox-styles -->
+        <input id="satellite-v9" type="radio" name="rtoggle" value="satellite">
+        <label for="satellite-v9">satellite</label>
+        <input id="dark-v10" type="radio" name="rtoggle" value="dark" checked="checked">
+        <label for="dark-v10">dark</label>
+        <input id="light-v10" type="radio" name="rtoggle" value="light">
+        <label for="light-v10">light</label>
+        <input id="streets-v11" type="radio" name="rtoggle" value="streets">
+        <label for="streets-v11">streets</label>
+        <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors">
+        <label for="outdoors-v11">outdoors</label>
+    </div>
+    <script type="module" src="/src/index.js"></script>
+  </body>
+</html>
