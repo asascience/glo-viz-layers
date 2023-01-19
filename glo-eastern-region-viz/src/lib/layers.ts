@@ -493,7 +493,7 @@ export function add100YrBLE(map: mapboxgl.Map, layerUrlPath: string) {
     );
 }
 
-export function addTxDOTOvertoppping(map: mapboxgl.Map, layerUrlPath: string) {
+export function addTxDOTOvertoppping(map: mapboxgl.Map, popup: mapboxgl.Popup, layerUrlPath: string) {
     const layerId = 'TxDOT Overtopping';
 
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
@@ -501,7 +501,7 @@ export function addTxDOTOvertoppping(map: mapboxgl.Map, layerUrlPath: string) {
         type: 'geojson',
         data: `${layerUrlPath}/${encodeURIComponent(layerId)}.geojson`,
         generateId: true
-    }); 
+    });
 
     map.addLayer(
         {
@@ -531,7 +531,146 @@ export function addTxDOTOvertoppping(map: mapboxgl.Map, layerUrlPath: string) {
             layout: { 'visibility': 'none' } //on load
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-    ); 
+    );
 
+    // TODO
+    let txdotHover = null
 
+    map.on('mousemove', layerId, (e) => {
+        if (e.features.length > 0) {
+
+            let propz = e.features[0].properties
+            popup
+                .setLngLat(e.lngLat)
+                .setHTML(`<h3>${propz.RTE_NM}</h5><br>
+            <strong>${propz.COND_START_TS} - ${propz.COND_END_TS}</strong><br><br>
+            ${propz.COND_DSCR}`)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+
+            if (txdotHover !== null) {
+                map.setFeatureState(
+                    { source: layerId, id: txdotHover },
+                    { hover: false }
+                );
+            }
+            txdotHover = e.features[0].id;
+
+            map.setFeatureState(
+                { source: layerId, id: txdotHover },
+                { hover: true }
+            );
+        }
+    });
+    // When the mouse leaves the state-fill layer, update the feature state of the
+    // previously hovered feature.
+    map.on('mouseleave', layerId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+
+        if (txdotHover !== null) {
+            map.setFeatureState(
+                { source: layerId, id: txdotHover },
+                { hover: false }
+            );
+        }
+        txdotHover = null;
+    });
+}
+
+export function addHUCLayer(layerId: string, map: mapboxgl.Map, popup: mapboxgl.Popup, layerUrlPath: string) {
+    map.addSource(layerId, {
+        'type': 'geojson',
+        'data': `${layerUrlPath}/${layerId}.geojson`,
+    });
+
+    map.addLayer(
+        {
+            'id': layerId,
+            'type': 'line',
+            'source': layerId,
+            'paint': {
+                'line-color': '#ffffff',
+                'line-width': 12 * 12 * 12 * 12 * .5 / Math.pow(parseInt(layerId.replace('HUC', '')), 4),
+                'line-opacity': .8
+            },
+            'layout': { 'visibility': 'none' } //on load
+        }
+        // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+    );
+
+    map.addLayer(
+        {
+            'id': layerId + '-fill',
+            'type': 'fill',
+            'source': layerId,
+            'paint': {
+                'fill-opacity': 0
+            },
+            'layout': { 'visibility': 'none' } //on load
+        }
+        // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+    );
+
+    map.on('click', layerId + '-fill', (event) => {
+        popup
+            .setLngLat(event.lngLat)
+            .setHTML(`<strong>${layerId}</strong> ${event.features[0].properties.name}<br>
+                    ${event.features[0].properties.huc8}`)
+            .addTo(map);
+    });
+
+    map.on('mouseleave', layerId + '-fill', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    map.on('mouseenter', layerId + '-fill', (event) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+    })
+}
+
+export interface FloodzoneLayer {
+    id: string,
+    color: string,
+}
+
+export function addFloodZoneLayer(layer: FloodzoneLayer, map: mapboxgl.Map, popup: mapboxgl.Popup, layerUrlPath: string) {
+    map.addSource(layer.id, {
+        'type': 'geojson',
+        'data': `${layerUrlPath}/Floodplain/${encodeURIComponent(layer.id)}.geojson`
+    })
+
+    map.addLayer(
+        {
+            'id': layer.id,
+            'type': 'fill',
+            'source': layer.id,
+            'paint': {
+                'fill-color': layer.color,
+                'fill-opacity': .35
+            },
+            'layout': { 'visibility': 'none' } //on load
+        }
+        // ,'FEMA '+lyrId
+    );
+
+    map.on('click', layer.id, (event) => {
+        popup
+            .setLngLat(event.lngLat)
+            .setHTML(`<strong>FEMA ${layer.id} Floodplain</strong>`)
+            .addTo(map);
+    });
+
+    map.on('mouseleave', layer.id, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    map.on('mouseenter', layer.id, (event) => {
+        // Change the cursor style as a UI indicator.
+        map.getCanvas().style.cursor = 'pointer';
+    })
 }
