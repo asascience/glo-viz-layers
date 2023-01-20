@@ -333,7 +333,7 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
     }
 }
 
-const tutorial = async(map, routeURL) => {
+const tutorial = async(map) => {
     await fly(map,-94.1412,30.1029,12)
     await sleep(3.5)
     map.addSource('pointer', {
@@ -406,7 +406,7 @@ const tutorial = async(map, routeURL) => {
     playing = true;
     let route: any = undefined
     let lastcoord: any;
-    async function update(timer) { // Main update loop
+    async function update(_) { // Main update loop
         let zyp: any;
 
         // your draw code
@@ -1487,7 +1487,7 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
             popup.remove();
             });
 
-        map.on('mouseenter', huc+'-fill', (event) => {
+        map.on('mouseenter', huc+'-fill', (_) => {
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         })
@@ -1506,7 +1506,7 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
             popup.remove();
             });
             
-        map.on('mouseenter', lyrId, (event) => {
+        map.on('mouseenter', lyrId, (_) => {
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         })
@@ -1546,7 +1546,7 @@ map.on('load', async ()=> {
     // console.log(urlParams.keys())
     
     if ( urlParams.toString().includes(replossId.replaceAll(' ','+')) ) {
-        tutorial(map, undefined) //only if on base url
+        tutorial(map) //only if on base url
     }
 })
 

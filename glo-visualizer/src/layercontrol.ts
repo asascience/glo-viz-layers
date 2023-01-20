@@ -332,7 +332,7 @@ function filterModal(map, layer) {
             }
         });
 
-        form.addEventListener("reset", function (e) {
+        form.addEventListener("reset", function (_) {
             layer.metadata.layers.forEach(l => {
                 map.setFilter(l)
             })

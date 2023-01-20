@@ -81,7 +81,7 @@ export function getActiveLayers(map, layers) {
     let _ids = getMapLayerIds(_mapLayers);
     let urlParams = new URLSearchParams(window.location.search);
     let _layers = [...urlParams.keys()];
-    let _values = [...urlParams.values()]; //COULD USE THIS IN THE FUTURE TO TURN LAYERS OFF FOR NOW ADDING ALL LAYERS AS VISIBILITY NONE AND TURNING THEM ON WITH THE LAYER CONTROL
+    //let _values = [...urlParams.values()]; //COULD USE THIS IN THE FUTURE TO TURN LAYERS OFF FOR NOW ADDING ALL LAYERS AS VISIBILITY NONE AND TURNING THEM ON WITH THE LAYER CONTROL
     _layers.map(function (l) {
         if (keys.indexOf(l) > -1) {
             let visibility = getLayerVisibility(_mapLayers, _ids, l);
