@@ -37,46 +37,6 @@ const map =  new mapboxgl.Map({
     zoom: z0,
 });
 
-// function getAnimateMouse(map,route) {
-//     // Update the data to a new position based on the animation timestamp. The
-//     // divisor in the expression `timestamp / 1000` controls the animation speed.
-//     function anim8(timestamp) {
-//         // console.log(map.getSource('pointer') )
-//         t = parseInt(timestamp / 100)
-//         // console.log(t)
-//         map.getSource('pointer').setData( {
-//         'type':'Point',
-//         'coordinates':route[t]
-//     } );
-    
-//     // Request the next frame of the animation.
-//     if (t<route.length) {
-//         requestAnimationFrame(anim8) }
-//     }
-    
-//     return anim8
-// }
-
-// function addlyr(map,lyrId,geodata) {}
-// function addPopup(map,lyrId) {
-//     map.on('click', huc+'-fill', (event) => {
-//         popup
-//             .setLngLat(event.lngLat)
-//             .setHTML(`<strong>${huc}</strong> ${event.features[0].properties.name}<br>
-//                     ${event.features[0].properties.huc8}`)
-//             .addTo(map);
-//         });     
-
-//         map.on('mouseenter', huc+'-fill', (event) => {
-//             // Change the cursor style as a UI indicator.
-//             map.getCanvas().style.cursor = 'pointer';
-//         })
-//         map.on('mouseleave', huc+'-fill', () => {
-//             map.getCanvas().style.cursor = '';
-//             popup.remove();
-//             });
-// }
-
 function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
     // q0-2: quantile distribution of heatlyr.densityAttr to base the heatmap color ramp off, (min, q50, max)
     let lyrId = heatlyr.id
@@ -1195,14 +1155,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 '100YR Effective']
     let colrs = zip(fldzonelyrs,['#c36c08','#c7af0e','#0000b0','#5544fd'])
     colrs = Object.fromEntries(colrs)
+
     fldzonelyrs.forEach(lyrId=>{
         map.addSource(lyrId, {
         'type': 'geojson',
         'data': lyrdir+'Floodplain/'+lyrId+'.geojson'
-    })
+    });
 
-    map.addLayer(
-        {
+    map.addLayer({
             'id': lyrId,
             'type': 'fill',
             'source': lyrId,
@@ -1211,57 +1171,16 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'fill-opacity': .35
             },
             'layout': { 'visibility':'none'} //on load
-        }
-        // ,'FEMA '+lyrId
-        )
-        // map.addLayer(
-        // {
-        //     'id': lyrId+'-fill',
-        //     'type': 'fill',
-        //     'source': lyrId,
-        //     'paint': {
-        //         'fill-opacity': 0
-        //     },
-        //     'layout': { 'visibility':'none'} //on load
-        // }
-        // // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        // )
+        });
         
-        legendlyrs.push(
-            {
+        legendlyrs.push({
             id: lyrId,
             hidden: false,
             group: "FEMA Floodplain",
             // children:[lyrId+'-fill'],
             directory: "Legend"
-            }
-            // {
-            // id: lyrId+'-fill',
-            // parent: lyrId,
-            // hidden: true,
-            // group: "Boundaries",
-            // directory: "Legend"
-            // }
-            )
-    })
-
-    // fldzonelyrs.forEach(lyrId=>{ //add custom click for strucs in fldplain
-    //     map.on('click', 'FEMA '+lyrId+'-point', (event) => {
-    //     popup
-    //         .setLngLat(event.lngLat)
-    //         .setHTML(`<strong>Stucture within FEMA ${lyrId} Floodplain</strong>`)
-    //         .addTo(map);
-    //     });     
-    //     map.on('mouseleave', 'FEMA '+lyrId+'-point', () => {
-    //         map.getCanvas().style.cursor = '';
-    //         popup.remove();
-    //         });
-    //     map.on('mouseenter', 'FEMA '+lyrId+'-point', (event) => {
-    //         // Change the cursor style as a UI indicator.
-    //         map.getCanvas().style.cursor = 'pointer';
-    //     })
-
-    // })
+        });
+    });
 
     let heatmaplyrs = [
         {id:replossId,
@@ -1289,26 +1208,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         {'id': 'National Shelter System Facilities',
         'data': dir+'TWDB_Critical_Infrastructure/National Shelter System Facilities.geojson'
         ,coloramp:CUBE_HELIX, grup:'TWDB Critical Infrastructure'},
-    ]
-    
-    // heatmaplyrs = heatmaplyrs.map(heatlyr=>{
-    //         if (!heatlyr.hasOwnProperty('data') ) {
-    //         heatlyr.data = lyrdir+encodeURIComponent(heatlyr.id)+'.geojson'
-    //     }
-    //     if (!heatlyr.hasOwnProperty('densityAttr') ) {
-    //         heatlyr.densityAttr = null
-    //     }
-    //     if (!heatlyr.hasOwnProperty('coloramp') ) {
-    //         heatlyr.coloramp = viridis
-    //     }
-    //     if (!heatlyr.hasOwnProperty('lblPrefix') ) {
-    //         heatlyr.lblPrefix = ''
-    //     }
-    //     if (!heatlyr.hasOwnProperty('lblSuff') ) {
-    //         heatlyr.lblSuff = ''
-    //     }
-    //     return heatlyr
-    //     })
+    ];
     
     heatmaplyrs.forEach(heatlyr => {
         addHeatmap(map,heatlyr);
@@ -1327,8 +1227,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             group: heatlyr.grup,
             directory: "Legend",
             }
-        )
-    })
+        );
+    });
+
     // legendlyrs[legendlyrs.map((x)=>x.id).indexOf(replossId)].group = 'Repetitive Loss'
     // legendlyrs[legendlyrs.map((x)=>x.id).indexOf(replossId+'-point')].group = 'Repetitive Loss'
 
@@ -1375,16 +1276,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         // // based on the feature found.
         // popup.setLngLat(coordinates).setHTML(description).addTo(map);
         });
-        
-        // map.on('mouseleave', 'FEMA Severe Repetitive Loss Properties-point', () => {
-        // map.setLayoutProperty('zipcodes', 'visibility', 'none');
-        // map.getCanvas().style.cursor = '';
-        // popup.remove();
-        // });
-
-    // map.on('mouseenter', 'zipcodes', (event) => {
-
-    // })
     
     map.on('mousemove', 'zipcodes', (e) => {
         if ((e.features?.length ?? 0) > 0 && playing==false) {
