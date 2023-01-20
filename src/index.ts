@@ -29,6 +29,7 @@ let dir = 'http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/';
 let lyrdir = dir +'bringtheheat/';
 let huclyrdir = dir+'HUC/';
 let janlayerdir = dir + 'layers_jan_2023/';
+let janLayerDir2 = 'https://glo-repetitiveloss.s3.us-east-2.amazonaws.com/layers_jan_2023/';
 
 const map =  new mapboxgl.Map({
     container: 'map',
@@ -46,8 +47,8 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
         if (!heatlyr.hasOwnProperty('densityAttr') ) {
             heatlyr.densityAttr = null
         }
-        if (!heatlyr.hasOwnProperty('coloramp') ) {
-            heatlyr.coloramp = VIRIDIS
+        if (!heatlyr.hasOwnProperty('colormap') ) {
+            heatlyr.colormap = VIRIDIS
         }
         if (!heatlyr.hasOwnProperty('lblPrefix') ) {
             heatlyr.lblPrefix = ''
@@ -97,7 +98,7 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
                         'interpolate',
                         ['linear'],
                         ['heatmap-density'],
-                        ...heatlyr.coloramp],
+                        ...heatlyr.colormap],
                     // Adjust the heatmap radius by zoom level
                     'heatmap-radius': [
                         'interpolate',
@@ -199,7 +200,7 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
                         'interpolate',
                         ['linear'],
                         ['heatmap-density'],
-                        ...heatlyr.coloramp],
+                        ...heatlyr.colormap],
                     // Adjust the heatmap radius by zoom level
                     'heatmap-radius': [
                         'interpolate',
@@ -1001,6 +1002,87 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         }
         )
 
+    
+    lyrId = 'Counties Within Neches River Watershed'
+    map.addSource(lyrId, {
+        type: "geojson",
+        data: janLayerDir2 + "Country+boundaries/Neches_Counties_fixed.geojson"
+    })
+    map.addLayer(
+        {
+            id: lyrId,
+            source: lyrId,
+            type: 'fill',
+            layout: {},
+            paint: {
+                'fill-color': '#ffffff',
+                'fill-outline-color': '#000000',
+                'fill-opacity': 1,
+            }
+        }
+    )
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Neches Watershed",
+        directory: "Legend"
+    })
+
+    // Mapbox doesn't support line-width for polygons, so I added these line versions to the S3 bucket:
+    // Neches counties, Jefferson county drainage districts, FIF Cat 1 project areas, and Regional flood planning groups 
+    lyrId = 'Counties Within Neches River Watershed (Line)'
+    map.addSource(lyrId, {
+        type: "geojson",
+        data: janLayerDir2 + "Country+boundaries/Neches_Counties_lines_fixed.geojson"
+    })
+    map.addLayer(
+        {
+            id: lyrId,
+            source: lyrId,
+            type: 'line',
+            layout: {},
+            paint: {
+                'line-color': 'rgb(0, 255, 247)',
+                'line-opacity': 1,
+                "line-width": 1.3
+            }
+        }
+    )
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Neches Watershed",
+        directory: "Legend"
+    })
+
+    // National Land Cover Database
+    lyrId = 'Land Cover 2019'
+    map.addSource(lyrId, {
+        'type': 'raster',
+        'tiles': [
+            'https://www.mrlc.gov/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=mrlc_display%3ANLCD_2019_Land_Cover_L48&TILED=true&SRS=EPSG%3A3857&jsonLayerId=allconusNlcd2019LandCover&STYLES=&WIDTH=256&HEIGHT=256&CRS=EPSG%3A3857&bbox={bbox-epsg-3857}'
+        ],
+        'tileSize': 256
+    });
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'raster',
+            'source': lyrId,
+            'paint': {}
+        },
+        'building' // Place layer under labels, roads and buildings.
+    );
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "NLCD",
+        directory: "Legend"
+    })
+
 
     //txdot overtopping
     lyrId = 'TxDOT Overtopping'
@@ -1183,31 +1265,55 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 
     let heatmaplyrs = [
-        {id:replossId,
-        data:reptLossData,
-        densityAttr:'reptloss',
-        coloramp: TURBO,
-        grup:"Repetitive Loss"},
-
-        {id:'FEMA 500YR Preliminary',grup:"Structures within FEMA Floodplain"
-        ,lblPrefix:'Structures within ',lblSuff:' Floodplain'},
-        {id:'FEMA 500YR Effective',grup:"Structures within FEMA Floodplain"
-        ,lblPrefix:'Structures within ',lblSuff:' Floodplain'},
-        {id:'FEMA 100YR Preliminary',grup:"Structures within FEMA Floodplain"
-        ,lblPrefix:'Structures within ',lblSuff:' Floodplain'},
-        {id:'FEMA 100YR Effective',grup:"Structures within FEMA Floodplain"
-        ,lblPrefix:'Structures within ',lblSuff:' Floodplain'},
-
-        {'id': 'Current Schools',
-        'data': dir+'TWDB_Critical_Infrastructure/Current Schools.geojson',
-        coloramp: CUBE_HELIX, grup:'TWDB Critical Infrastructure'},
-        {'id': 'Fire Stations',
-        'data': dir+'TWDB_Critical_Infrastructure/Fire Stations.geojson', coloramp:CUBE_HELIX, grup:'TWDB Critical Infrastructure'},
-        {'id': 'Hospitals', 'data': dir+'TWDB_Critical_Infrastructure/Hospitals.geojson'
-        ,coloramp: CUBE_HELIX, grup:'TWDB Critical Infrastructure'},
-        {'id': 'National Shelter System Facilities',
-        'data': dir+'TWDB_Critical_Infrastructure/National Shelter System Facilities.geojson'
-        ,coloramp:CUBE_HELIX, grup:'TWDB Critical Infrastructure'},
+        {
+            id: replossId,
+            data: reptLossData,
+            densityAttr: 'reptloss',
+            colormap: TURBO,
+            grup: "Repetitive Loss"
+        },
+        {
+            id: 'FEMA 500YR Preliminary',
+            grup: "Structures within FEMA Floodplain",
+            lblPrefix: 'Structures within ',
+            lblSuff: ' Floodplain'
+        },
+        {
+            id: 'FEMA 500YR Effective',
+            grup: "Structures within FEMA Floodplain",
+            lblPrefix: 'Structures within ',
+            lblSuff: ' Floodplain'
+        },
+        {
+            id: 'FEMA 100YR Preliminary',
+            grup: "Structures within FEMA Floodplain",
+            lblPrefix: 'Structures within ',
+            lblSuff: ' Floodplain'
+        },
+        {
+            id: 'FEMA 100YR Effective',
+            grup: "Structures within FEMA Floodplain",
+            lblPrefix: 'Structures within ',
+            lblSuff: ' Floodplain'
+        },
+        {
+            'id': 'Current Schools',
+            'data': dir + 'TWDB_Critical_Infrastructure/Current Schools.geojson',
+            colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+        },
+        {
+            'id': 'Fire Stations',
+            'data': dir + 'TWDB_Critical_Infrastructure/Fire Stations.geojson', colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+        },
+        {
+            'id': 'Hospitals', 'data': dir + 'TWDB_Critical_Infrastructure/Hospitals.geojson'
+            , colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+        },
+        {
+            'id': 'National Shelter System Facilities',
+            'data': dir + 'TWDB_Critical_Infrastructure/National Shelter System Facilities.geojson'
+            , colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+        },
     ];
     
     heatmaplyrs.forEach(heatlyr => {
