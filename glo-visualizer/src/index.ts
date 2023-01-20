@@ -1,7 +1,22 @@
+import 'mapbox-gl/dist/mapbox-gl.css'; 
+import 'mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'; 
+import './style.css';
+
 import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from 'mapbox-gl-geocoder';
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoib3BlbnNvdXJjZXJlciIsImEiOiJja3lsbzNveHAwbndkMnZwZXYxeWxnM3pzIn0.BD4akCoe1u4dg7gcl3J4cQ';
+
+// Global vars
+let popup: mapboxgl.Popup;
+let playing = false
+let legendConfig: any;
+let hoveredId: string | number | null = null;
+let legendlyrs: any[] = [];
+let reptLossData: any;
+const replossId = 'FEMA Severe Repetitive Loss Properties'
+
+const zip = (a, b) => Array.from(a).map((k, i) => [k, Array.from(b)[i]])
 
 function GetAllChecked(boxes) {
     let boolean = false;
@@ -103,10 +118,25 @@ if (index < 0) {
 }
 class layerControlGrouped {
 
+    _collapsed: boolean = false;
+    _addLayers: boolean = false; 
+    _layers: any[];
+    _layerIds: string[];
+    _directories: string[];
+    _groups: string[];
+    _layerControlConfig: any;
+
+    _map: mapboxgl.Map | undefined;
+    _sources: any[] = [];
+    _div: any = undefined;
+    _container: any = undefined;
+
+    _activeLayers: string[] = [];
+    _mapLayers: any[] = [];
+    _mapLayerIds: string[] = [];
+
     constructor(options) {
         options = (!options) ? {} : options;
-
-        this._collapsed = false;
 
         if ((options.options && options.options.collapsed) || (options && options.collapsed)) {
         this._collapsed = true;
@@ -239,7 +269,7 @@ class layerControlGrouped {
         })
 
         this._activeLayers = GetActiveLayers(this._map, this._layers)
-        this._mapLayers = this._map.getStyle().layers;
+        this._mapLayers = this._map!.getStyle().layers;
         this._mapLayerIds = GetMapLayerIds(this._mapLayers);
 
         // console.log(this._mapLayerIds, this._layers)
@@ -326,12 +356,14 @@ class layerControlGrouped {
         if (e.target.dataset.mapLayer) {
             SetLayerVisibility(map, e.target.checked, e.target.id);
             if (e.target.dataset.children) {
-            let children = document.querySelectorAll("[data-parent]");
-            for (let i = 0; i < children.length; i++) {
-                if (children[i].dataset.parent === e.target.id) {
-                children[i].click()
+                let children = document.querySelectorAll("[data-parent]");
+                for (let i = 0; i < children.length; i++) {
+                    // @ts-ignore
+                    if (children[i].dataset.parent === e.target.id) {
+                        // @ts-ignore
+                        children[i].click()
+                    }
                 }
-            }
             }
         // e.target.blur()              
             return
@@ -342,9 +374,10 @@ class layerControlGrouped {
             let group = e.target.dataset.group;
             let groupMembers = document.querySelectorAll("[data-group]");
             for (let i = 0; i < groupMembers.length; i++) {
-            if (group != "false" && groupMembers[i].dataset.group === group) {
-                SetLayerVisibility(map, e.target.checked, groupMembers[i].id);
-            }
+                // @ts-ignore
+                if (group != "false" && groupMembers[i].dataset.group === group) {
+                    SetLayerVisibility(map, e.target.checked, groupMembers[i].id);
+                }
             }
             return
         }
@@ -386,31 +419,37 @@ class layerControlGrouped {
             }
             },410);
             setTimeout(function() {
-            _this._map.resize()
+            _this._map?.resize()
             },450)
             return
         }
         })
 
         if (this._collapsed) {
-        this._map.on("click", function () {
+        this._map?.on("click", function () {
             _this._div.classList.add("collapsed")
         })
         }
 
         //NEED TO SET THIS AT THE BEGINNING PASS IN CURRENT ZOOM OF MAP AND SET DISABLED PROPERTY THIS ALSO BINGS IN WEIRD THINGS WITH THE CHECK ALL GROUP BUT TACKLE THAT LATER
-        this._map.on("zoomend", function () {
-        let zoomendMap = this;
-        let lcLayers = document.querySelectorAll("[data-master-layer]");
-        lcLayers.forEach(function (l) {
-            if (l.dataset.minzoom && l.dataset.minzoom > zoomendMap.getZoom()) {
-            l.parentElement.style.opacity = "0.3"
-            l.disabled = true
-            } else {
-            l.parentElement.style.opacity = "1"
-            l.disabled = false
-            }
-        });
+        this._map?.on("zoomend", function () {
+            // @ts-ignore
+            let zoomendMap = this;
+            let lcLayers = document.querySelectorAll("[data-master-layer]");
+            lcLayers.forEach(function (l) {
+                // @ts-ignore
+                if (l.dataset.minzoom && l.dataset.minzoom > zoomendMap.getZoom()) {
+                    // @ts-ignore
+                    l.parentElement.style.opacity = "0.3"
+                    // @ts-ignore
+                    l.disabled = true
+                } else {
+                    // @ts-ignore
+                    l.parentElement.style.opacity = "1"
+                    // @ts-ignore
+                    l.disabled = false
+                }
+            });
         })
 
         return this._div;
@@ -434,6 +473,7 @@ function lcCreateLayerToggle(map, layer, checked, sources) {
 
     if (layer.hidden) {
         div.style.display = "none";
+        // @ts-ignore
         div.dataset.hidden = true
     }
 
@@ -447,6 +487,7 @@ function lcCreateLayerToggle(map, layer, checked, sources) {
         //only add the source to one layer to avoid loading the same file simultaneously - not really working...need to do this per layer group
         // if (!sources.includes()) {
         // console.log("adding lazy loading info for", layer.id)
+        // @ts-ignore
         input.dataset.lazyLoading = true;
         input.dataset.source = layer.metadata.source.id
         input.dataset.sourceType = layer.metadata.source.type
@@ -460,16 +501,20 @@ function lcCreateLayerToggle(map, layer, checked, sources) {
     }
 
     if (layer.children) {
+        // @ts-ignore
         input.dataset.children = true;
+        // @ts-ignore
         input.dataset.masterLayer = true;
     }
     if (layer.parent) {
         input.dataset.parent = layer.parent;
     } else {
+        // @ts-ignore
         input.dataset.masterLayer = true;
     }
 
     input.className = "layer slide-toggle";
+    // @ts-ignore
     input.dataset.mapLayer = true;
     if (checked) input.checked = true;
 
@@ -477,6 +522,7 @@ function lcCreateLayerToggle(map, layer, checked, sources) {
 
     input.onclick = function () {
         lcCheckLazyLoading(map, this)
+        // @ts-ignore
         lcSetActiveLayers(this.id, this.checked)
         lcSetLegendVisibility(this)
         lcSetDirectoryLayerCount(this);
@@ -509,16 +555,18 @@ function lcCreateLayerToggle(map, layer, checked, sources) {
         let filterSpan = document.createElement("span");
         filterSpan.style.float = "right";
         filterSpan.style.height = "20px";
-        filterSpan.style.opacity = 0.3;
+        filterSpan.style.opacity = "0.3";
         filterSpan.innerHTML = filterIcon();
         filterSpan.onclick = function() {
         filterModal(map, layer)
         }
         filterSpan.onmouseenter = function() {
-        this.style.opacity = 1;
+            // @ts-ignore
+            this.style.opacity = 1;
         }
         filterSpan.onmouseleave= function() {
-        this.style.opacity = 0.3;
+            // @ts-ignore
+            this.style.opacity = 0.3;
         }
         div.appendChild(filterSpan)
     }
@@ -573,11 +621,13 @@ function lcSetDirectoryLayerCount(e) {
 function lcCreateDicrectory(directoryName, layerCount) {
 
     let accordian = document.createElement("div");
+    // @ts-ignore
     accordian.dataset.accordian = true;
     accordian.style.backgroundColor = "white";
     accordian.className = "mgl-layerControlDirectory";
 
     let button = document.createElement("button");
+    // @ts-ignore
     button.dataset.directoryToggle = true
 
     accordian.appendChild(button);
@@ -587,6 +637,7 @@ function lcCreateDicrectory(directoryName, layerCount) {
     d.id = directoryName.replace(/ /g, "_");
     d.innerText = directoryName;
     d.dataset.name = directoryName;
+    // @ts-ignore
     d.dataset.directoryToggle = true
 
     var counter = document.createElement("span");
@@ -659,7 +710,7 @@ function lcCreateButton(collapsed) {
 
 function lcCreateLegend(style) {
     let type = Object.keys(style)
-    let legend = false;
+    let legend: string | undefined = undefined;
     if (type.indexOf("line-color") > -1 && isString(style["line-color"])) {
         legend = `<icon class='fa fa-minus' style='color:${style["line-color"]};margin-right:6px;'></icon>`;
     }
@@ -682,21 +733,17 @@ function lcSetActiveLayers(l, checked) {
     let _visibility = checked;
     let params = new URLSearchParams(window.location.search);
     if (_visibility) {
-        params.set(_layer, true);
-        if (history.replaceState) {
+        params.set(_layer, "true");
         let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
         window.history.replaceState({
             path: url
         }, '', url);
-        }
     } else {
         params.delete(_layer);
-        if (history.replaceState) {
         let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
         window.history.replaceState({
             path: url
         }, '', url);
-        }
     }
 }
 
@@ -714,6 +761,7 @@ function filterModal(map, layer) {
     if (!document.getElementById(id)) {
         var modal = document.createElement("div");
         modal.id = id;
+        // @ts-ignore
         modal.classList = "modal"
         modal.style.alignItems = "flex-start";
         modal.innerHTML = `
@@ -760,7 +808,7 @@ function filterModal(map, layer) {
         })
         })
 
-        modal.querySelector(".modal-body").appendChild(form)
+        modal.querySelector(".modal-body")?.appendChild(form)
         document.body.appendChild(modal);
         window.location.hash = "#"
         window.location.hash = id
@@ -776,7 +824,7 @@ function buildFilter(data, layer) {
 
     // console.log(fields, values)
 
-    var filter = [];
+    var filter: any[] = [];
 
     for (var i = 0; i < fields.length; i++) {
         if (fields[i].includes("operator")) continue;
@@ -861,10 +909,10 @@ function loadingIcon(map) {
     </svg>`
     const background = document.createElement("div");
     background.style.position = "absolute";
-    background.style.top = 0;
-    background.style.left = 0;
-    background.style.bottom = 0;
-    background.style.zIndex = 1;
+    background.style.top = "0";
+    background.style.left = "0";
+    background.style.bottom = "0";
+    background.style.zIndex = "1";
     background.style.width = "100%"
     background.style.background = "rgba(255,255,255,0.5)"
 
@@ -1481,7 +1529,7 @@ const cubehelix = [0.0,
 let x0,y0,z0
 [x0,y0,z0] = [-94.4,30,8]
     
-let hoveredId = null;
+
 let dir = 'http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/'
 let lyrdir = dir +'bringtheheat/'
 let huclyrdir = dir+'HUC/'
@@ -1809,6 +1857,169 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
     }
 }
 
+const tutorial = async(map, routeURL) => {
+    await fly(map,-94.1412,30.1029,12)
+    await sleep(3.5)
+    map.addSource('pointer', {
+    'type': 'geojson',  //TODO mouse outline
+    // 'type':'Point',
+    'data': [0,0]//pointerData(x0,y0)
+    });
+    // console.log(pointerData(x0,y0))
+    // map.loadImage(
+    //     lyrdir+'mouse.jpg', //too choppy, have to use a boring circle instead
+    // (error, image) => {
+    //     if (error) throw error;
+        
+    //     // Add the image to the map style.
+    //     map.addImage('mouse', image);
+        map.addLayer({
+            'id': 'pointer',
+            'source': 'pointer',
+            // 'type':'fill', //TODO mouse outline
+            // 'paint': {
+            // 'fill-color': 'white'
+            // }
+            'type': 'circle',
+            'paint': {
+            'circle-radius': 6,
+            'circle-color': 'white'
+            }
+            // 'type': 'symbol',
+            // 'layout': {
+            //     'icon-image':'mouse',
+            //     'icon-size':.25
+            // }
+        })
+
+    //     }
+    // )
+
+    let routes = await fetchJSON(lyrdir+'pointerpath.geojson')
+    routes = routes.features
+    routes.sort((a, b) => (a.properties.route > b.properties.route) ? 1 : -1)
+    // console.log(routes)
+
+    const parseRoute = (feat)=> {
+        let route = feat.geometry.coordinates
+        if (route.length===1) {//multilinestrings
+            route=route[0]
+        }
+        return route
+    }
+
+    //TODO zip is hardcoded, replace this entirely
+    const zips = routes.map(feat=>feat.properties.zip)
+    routes = routes.map(parseRoute)
+    // console.log(zips)
+    //routes will be [ [[x1,y1],[x2,y2]] , [[x1,y1],...] , ... ]
+
+    function seq1(map,route) {
+        let pos = route.shift()
+        // console.log(pointerData(...pos))
+        // pos = parseRoute(pos)
+        // @ts-ignore
+        map.getSource('pointer').setData( pointerData(...pos) );
+        
+        // Request the next frame of the animation.
+        return route
+    }
+    
+    map.moveLayer('pointer')
+
+    playing = true;
+    let route: any = undefined
+    let lastcoord: any;
+    async function update(timer) { // Main update loop
+        let zyp: any;
+
+        // your draw code
+        if(route === undefined){ // is there an animation 
+        // no animation 
+            if(routes.length > 0){  // are there any animations on the stack
+                route = routes.shift(); // yes get the first anim
+                // console.log(zips)
+                zyp = zips.shift() //get the associated zip code to simulate mouse hover
+                // console.log(zyp)
+            }else{
+                playing = false;  // no animations to play so stop and exit
+                return;
+            }
+        }
+        if (route.length==1) {
+            lastcoord = route[0] //grab this before it gets Shifted off in seq1
+        }
+        route = seq1(map,route)
+        if(route.length===0){ // call the anim and check if returns true;
+            // animation ended so get the next animation function if there are any
+            // console.log(zyp)
+                await map.setFeatureState(
+                    { source: 'zipcodes', id: zyp },
+                    { hover: true }
+                    )
+
+                const aray = await reptLossData.features
+                const reptloss = await aray[aray.map((x)=>x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
+                // console.log(reptloss)
+                popup
+                .setLngLat(lastcoord)
+                .setHTML(`<strong>Repetitive Loss Properties:</strong> ${reptloss}<br>
+                        in zip code ${zyp}`)
+                .addTo(map)
+                map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
+                map.setLayoutProperty('zipcodes', 'visibility', 'visible')
+
+                await sleep(2.7)
+
+                // testhover = await map.getFeatureState({
+                // source: 'zipcodes',
+                // // sourceLayer: 'zipcodes',
+                // id: zyp
+                // })
+                // console.log(testhover)
+                
+                // console.log('close')
+                await map.setFeatureState(
+                    { source: 'zipcodes', id: zyp },
+                    { hover: false }
+                    )
+                popup.remove()
+                map.setLayoutProperty('zipcodes', 'visibility', 'none')
+
+            if(routes.length > 0){
+
+                route = routes.shift(); // get the next anim
+                zyp = zips.shift()
+            }else{
+                // console.log('fin')
+                playing = false; // no more animations so stop
+                route = undefined; // ready for new animtion
+                map.setLayoutProperty('pointer',  'visibility','none')
+
+                // await sleep(.2)
+                fly(map,x0,y0,z0)
+            }
+        }    
+
+        if(playing){
+            requestAnimationFrame(update); // get next frame
+        }
+    }
+
+    requestAnimationFrame(update); // starts the animation
+    // routes.forEach(feat=> {
+
+
+    //     animateMouse = getAnimateMouse(map,route)
+    //     animateMouse(0)
+    //     // await sleep(2)
+        
+    // })
+
+    // await new Promise(r => setTimeout(r, 10000))
+    // await fly(map,x0,y0,z0)
+}
+
 const loadErUp = async () => { //had to strip out to separate func to reload after style/basemap change 
 
     //3d buildings
@@ -1864,7 +2075,7 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
 
     // Add a geojson point source.
     // Heatmap layers also work with a vector tile source.
-    const reptLossData = await fetchJSON(lyrdir+'repetitiveLoss.geojson')
+    reptLossData = await fetchJSON(lyrdir+'repetitiveLoss.geojson')
 
     map.addSource('zipcodes', {
         'type': 'geojson',
@@ -1892,8 +2103,6 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
         )
-
-    const legendlyrs: any[] = []
 
     let lyrId = 'FEMA NHD Streams'
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
@@ -2557,7 +2766,6 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
                 )
         })
 
-    const zip = (a, b) => Array.from(a).map((k, i) => [k, Array.from(b)[i]])
     const fldzonelyrs = ['500YR Preliminary',
                 '500YR Effective',
                 '100YR Preliminary',
@@ -2632,7 +2840,6 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
 
     // })
 
-    const replossId = 'FEMA Severe Repetitive Loss Properties'
     let heatmaplyrs = [
         {id:replossId,
         data:reptLossData,
@@ -2765,19 +2972,18 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
     // })
     
     map.on('mousemove', 'zipcodes', (e) => {
-        if (e.features?.length ?? 0 > 0 && playing==false) {
-
+        if ((e.features?.length ?? 0) > 0 && playing==false) {
             if (hoveredId !== null) {
-            map.setFeatureState(
-            { source: 'zipcodes', id: hoveredId },
-            { hover: false }
-            );
+                map.setFeatureState(
+                    { source: 'zipcodes', id: hoveredId },
+                    { hover: false }
+                );
             }
 
-            hoveredId = e.features[0].id;
+            hoveredId = e.features![0].id ?? null;
             // console.log(typeof hoveredId)
             map.setFeatureState(
-            { source: 'zipcodes', id: hoveredId },
+            { source: 'zipcodes', id: hoveredId ?? undefined },
             { hover: true }
             );
         }
@@ -2787,10 +2993,11 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
     // previously hovered feature.
     map.on('mouseleave', 'zipcodes', () => {
         if (hoveredId !== null) {
-        map.setFeatureState(
-        { source: 'zipcodes', id: hoveredId },
-        { hover: false }
-        );
+            map.setFeatureState(
+                { source: 'zipcodes', id: hoveredId },
+                { hover: false }
+            );
+        
         }
         hoveredId = null;
         map.setLayoutProperty('zipcodes', 'visibility', 'none');
@@ -2802,8 +3009,8 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
         map.on('click', huc+'-fill', (event) => {
         popup
             .setLngLat(event.lngLat)
-            .setHTML(`<strong>${huc}</strong> ${event.features[0].properties.name}<br>
-                    ${event.features[0].properties.huc8}`)
+            .setHTML(`<strong>${huc}</strong> ${event.features![0].properties!.name}<br>
+                    ${event.features![0].properties!.huc8}`)
             .addTo(map);
         });     
 
@@ -2871,7 +3078,7 @@ map.on('load', async ()=> {
     // console.log(urlParams.keys())
     
     if ( urlParams.toString().includes(replossId.replaceAll(' ','+')) ) {
-        tutorial(map) //only if on base url
+        tutorial(map, undefined) //only if on base url
     }
 })
 
@@ -2902,164 +3109,6 @@ function pointerData(x,y) {
             }
 }
 
-tutorial = async(map,routeURL) => {
-        await fly(map,-94.1412,30.1029,12)
-        await sleep(3.5)
-        map.addSource('pointer', {
-        'type': 'geojson',  //TODO mouse outline
-        // 'type':'Point',
-        'data': [0,0]//pointerData(x0,y0)
-        });
-        // console.log(pointerData(x0,y0))
-        // map.loadImage(
-        //     lyrdir+'mouse.jpg', //too choppy, have to use a boring circle instead
-        // (error, image) => {
-        //     if (error) throw error;
-            
-        //     // Add the image to the map style.
-        //     map.addImage('mouse', image);
-            map.addLayer({
-                'id': 'pointer',
-                'source': 'pointer',
-                // 'type':'fill', //TODO mouse outline
-                // 'paint': {
-                // 'fill-color': 'white'
-                // }
-                'type': 'circle',
-                'paint': {
-                'circle-radius': 6,
-                'circle-color': 'white'
-                }
-                // 'type': 'symbol',
-                // 'layout': {
-                //     'icon-image':'mouse',
-                //     'icon-size':.25
-                // }
-            })
-
-        //     }
-        // )
-
-        routes = await fetchJSON(lyrdir+'pointerpath.geojson')
-        routes = routes.features
-        routes.sort((a, b) => (a.properties.route > b.properties.route) ? 1 : -1)
-        // console.log(routes)
-
-        parseRoute = (feat)=> {
-            route = feat.geometry.coordinates
-            if (route.length===1) {//multilinestrings
-            route=route[0]
-            }
-            return route
-        }
-        //TODO zip is hardcoded, replace this entirely
-        zips = routes.map(feat=>feat.properties.zip)
-        routes = routes.map(parseRoute)
-        // console.log(zips)
-        //routes will be [ [[x1,y1],[x2,y2]] , [[x1,y1],...] , ... ]
-
-        function seq1(map,route) {
-            let pos = route.shift()
-            // console.log(pointerData(...pos))
-            // pos = parseRoute(pos)
-            map.getSource('pointer').setData( pointerData(...pos) );
-            
-            // Request the next frame of the animation.
-            return route
-        }
-        
-        map.moveLayer('pointer')
-
-        playing = true;
-        route = undefined
-        async function update(timer) { // Main update loop
-            // your draw code
-            if(route === undefined){ // is there an animation 
-            // no animation 
-                if(routes.length > 0){  // are there any animations on the stack
-                    route = routes.shift(); // yes get the first anim
-                    // console.log(zips)
-                    zyp = zips.shift() //get the associated zip code to simulate mouse hover
-                    // console.log(zyp)
-                }else{
-                    playing = false;  // no animations to play so stop and exit
-                    return;
-                }
-            }
-            if (route.length==1) {
-                lastcoord = route[0] //grab this before it gets Shifted off in seq1
-            }
-            route = seq1(map,route)
-            if(route.length===0){ // call the anim and check if returns true;
-                // animation ended so get the next animation function if there are any
-                // console.log(zyp)
-                    await map.setFeatureState(
-                        { source: 'zipcodes', id: zyp },
-                        { hover: true }
-                        )
-
-                    aray = await reptLossData.features
-                    reptloss = await aray[aray.map((x)=>x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
-                    // console.log(reptloss)
-                    popup
-                    .setLngLat(lastcoord)
-                    .setHTML(`<strong>Repetitive Loss Properties:</strong> ${reptloss}<br>
-                            in zip code ${zyp}`)
-                    .addTo(map)
-                    map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
-                    map.setLayoutProperty('zipcodes', 'visibility', 'visible')
-
-                    await sleep(2.7)
-
-                    // testhover = await map.getFeatureState({
-                    // source: 'zipcodes',
-                    // // sourceLayer: 'zipcodes',
-                    // id: zyp
-                    // })
-                    // console.log(testhover)
-                    
-                    // console.log('close')
-                    await map.setFeatureState(
-                        { source: 'zipcodes', id: zyp },
-                        { hover: false }
-                        )
-                    popup.remove()
-                    map.setLayoutProperty('zipcodes', 'visibility', 'none')
-
-                if(routes.length > 0){
-
-                    route = routes.shift(); // get the next anim
-                    zyp = zips.shift()
-                }else{
-                    // console.log('fin')
-                    playing = false; // no more animations so stop
-                    route = undefined; // ready for new animtion
-                    map.setLayoutProperty('pointer',  'visibility','none')
-
-                    // await sleep(.2)
-                    fly(map,x0,y0,z0)
-                }
-            }    
-
-            if(playing){
-                requestAnimationFrame(update); // get next frame
-            }
-        }
-
-        requestAnimationFrame(update); // starts the animation
-        // routes.forEach(feat=> {
-
-
-        //     animateMouse = getAnimateMouse(map,route)
-        //     animateMouse(0)
-        //     // await sleep(2)
-            
-        // })
-
-        // await new Promise(r => setTimeout(r, 10000))
-        // await fly(map,x0,y0,z0)
-    }
-
     //basemap changer https://docs.mapbox.com/mapbox-gl-js/example/setstyle/
     const layerList = document.getElementById('menu');
     const inputs = layerList?.getElementsByTagName('input');
@@ -3072,7 +3121,7 @@ tutorial = async(map,routeURL) => {
         await loadErUp()
 
         //refresh lyrs
-        let params = await new URLSearchParams(window.location.search)
+        let params: any = await new URLSearchParams(window.location.search)
 
         let myparams = await zip(params.keys(),Array.from( params.values() ))
 
@@ -3105,6 +3154,7 @@ tutorial = async(map,routeURL) => {
         
     }
 
+    // @ts-ignore
     for (const input of inputs) {
         input.onclick = async (layer) => {
 
@@ -3112,7 +3162,7 @@ tutorial = async(map,routeURL) => {
                 await loadErUp()
 
                 //refresh lyrs
-                let params = await new URLSearchParams(window.location.search)
+                let params: any = await new URLSearchParams(window.location.search)
 
                 let myparams = await zip(params.keys(),Array.from( params.values() ))
 
@@ -3129,7 +3179,7 @@ tutorial = async(map,routeURL) => {
                 window.history.replaceState({
                     path: url
                 }, '', url);
-                
+
                 let _layers = [...params.keys()];
 
                 _layers.map(function(l) {
