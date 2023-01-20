@@ -1,82 +1,7 @@
-body {
-  margin: 0;
-  padding: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-#map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0; 
-  left: 0;
-}
-
-#title {
-  font-size: 15px;
-  padding: 12px;
-}
-
-/* #menu {
-background: #fff;
-position: absolute;
-z-index: 1;
-top: 10px;
-right: 10px;
-border-radius: 3px;
-width: 120px;
-border: 1px solid rgba(0, 0, 0, 0.4);
-font-family: 'Open Sans', sans-serif;
-}
-
-#menu a {
-font-size: 13px;
-color: #404040;
-display: block;
-margin: 0;
-padding: 0;
-padding: 10px;
-text-decoration: none;
-border-bottom: 1px solid rgba(0, 0, 0, 0.25);
-text-align: center;
-}
-
-#menu a:last-child {
-border: none;
-}
-
-#menu a:hover {
-background-color: #f8f8f8;
-color: #404040;
-}
-
-#menu a.active {
-background-color: #3887be;
-color: #ffffff;
-}
-
-#menu a.active:hover {
-background: #3074a4;
-} */
-
-#info {
-  font-family: 'Roboto', serif;
-  font-style: bold;
-  display: table;
-  position: relative;
-  width: 100%;
-  /* opacity: 0.7; */
-  margin: 0px auto;
-  word-wrap: anywhere;
-  white-space: pre-wrap;
-  /* padding: 2px; */
-  border: none;
-  border-radius: 0px;
-  font-size: 12px;
-  text-align: center;
-  color: rgb(255, 255, 255);
-  background: rgba(0, 0, 0, 0.4);
-  fill-opacity: .7;
-}
 
 .mapboxgl-popup-content {
   color: #ffffff;
@@ -367,15 +292,4 @@ SPECTRE MODAL
 .modal-container .modal-footer {
   padding: .8rem;
   text-align: right;
-}
-
-/* .popup {
-
-  } */
-#menu {
-  position: absolute;
-  background: #00f7ff6e;
-  padding: 6px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: bold;
 }
