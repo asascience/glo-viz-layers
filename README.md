@@ -1,9 +1,21 @@
-# glo-viz-layers
+# glo-visualizer
 
-http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/
+Vanilla typescript mapbox-gl app for visualizing eastern texas flood assessment GIS data. 
 
-Texas Infrastructure Repetitive Loss Visualization
+## Building
 
-## Deployment
+#### For development
 
-To Deploy, update the layers or follow the instructions to build [`glo-visualizer`](./glo-visualizer/README.md) and upload the new files to the `glo-repetitiveloss` bucket on the RPS DevOps S3
+```bash
+npm run dev
+```
+
+The server will hot reload on all changes.
+
+## Deployment 
+
+```bash
+npm run build
+```
+
+The server will compile the typescript and assets to `dist/` which can then be deployed as a static site wherever you wish
