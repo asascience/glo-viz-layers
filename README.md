@@ -6,4 +6,4 @@ Texas Infrastructure Repetitive Loss Visualization
 
 ## Deployment
 
-To Deploy, update the layers or `index.html` and upload the new files to the `glo-repetitiveloss` bucket on the RPS DevOps S3
+To Deploy, update the layers or follow the instructions to build [`glo-visualizer`](./glo-visualizer/README.md) and upload the new files to the `glo-repetitiveloss` bucket on the RPS DevOps S3
