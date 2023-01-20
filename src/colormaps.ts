@@ -1,6 +1,4 @@
-
-
-export const turbo = [
+export const TURBO = [
     // 0,
     // 'rgba(33,102,172,0)',
     0.0,
@@ -515,10 +513,9 @@ export const turbo = [
     'rgb(125.77, 5.01, 2.44)',
     0.996,
     'rgb(122.3, 4.04, 2.69)'
-];
+]
 
-export const viridis = [
-    0.0,
+export const VIRIDIS = [0.0,
     'rgba(68, 1, 84,0)',
     0.01,
     'rgb(68, 1, 84)',
@@ -540,8 +537,7 @@ export const viridis = [
     'rgb(253, 231, 37)'
 ];
 
-export const cubehelix = [
-    0.0,
+export const CUBE_HELIX = [0.0,
     'rgba(0, 0, 0,0)',
     0.01,
     'rgb(0, 0, 0)',
