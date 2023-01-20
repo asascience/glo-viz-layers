@@ -6,7 +6,7 @@ import mapboxgl from 'mapbox-gl';
 import MapboxGeocoder from 'mapbox-gl-geocoder';
 import { CUBE_HELIX, TURBO, VIRIDIS } from './colormaps';
 import { LayerControlGrouped } from './groupedlayercontrol';
-import { fetchJSON, fly, sleep, zip } from './utils';
+import { fetchJSON, fly, loadMapboxImage, sleep, zip } from './utils';
 
 mapboxgl.accessToken = 'pk.eyJ1Ijoib3BlbnNvdXJjZXJlciIsImEiOiJja3lsbzNveHAwbndkMnZwZXYxeWxnM3pzIn0.BD4akCoe1u4dg7gcl3J4cQ';
 
@@ -23,13 +23,12 @@ const replossId = 'FEMA Severe Repetitive Loss Properties'
 const layerList = document.getElementById('menu');
 const inputs = layerList?.getElementsByTagName('input');
 
-let x0,y0,z0
-[x0,y0,z0] = [-94.4,30,8]
+let [x0,y0,z0] = [-94.4,30,8]
     
-
-let dir = 'http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/'
-let lyrdir = dir +'bringtheheat/'
-let huclyrdir = dir+'HUC/'
+let dir = 'http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/';
+let lyrdir = dir +'bringtheheat/';
+let huclyrdir = dir+'HUC/';
+let janlayerdir = dir + 'layers_jan_2023/';
 
 const map =  new mapboxgl.Map({
     container: 'map',
@@ -475,7 +474,7 @@ const tutorial = async(map) => {
                 // await sleep(.2)
                 fly(map,x0,y0,z0)
             }
-        }    
+        }   
 
         if(playing){
             requestAnimationFrame(update); // get next frame
@@ -483,20 +482,9 @@ const tutorial = async(map) => {
     }
 
     requestAnimationFrame(update); // starts the animation
-    // routes.forEach(feat=> {
-
-
-    //     animateMouse = getAnimateMouse(map,route)
-    //     animateMouse(0)
-    //     // await sleep(2)
-        
-    // })
-
-    // await new Promise(r => setTimeout(r, 10000))
-    // await fly(map,x0,y0,z0)
 }
 
-const loadErUp = async () => { //had to strip out to separate func to reload after style/basemap change 
+const loadLayers = async () => { //had to strip out to separate func to reload after style/basemap change 
 
     //3d buildings
     // Insert the layer beneath any symbol layer.
@@ -698,56 +686,15 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
     // }
 
     lyrId = 'CDBG-MIT Proposed Projects'
-    await map.loadImage(
-        'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
-        async (error, image) => {
-        if (error) throw error;
-        await map.addImage('custom-marker', image!)
-        })
+
 
         map.addSource(lyrId+'-src', {
-        'type': 'geojson',
-        'data': dir+encodeURIComponent(lyrId)+'.geojson',
-        cluster: true,
-        // clusterMaxZoom: 10, // Max zoom to cluster points on
-        // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
-        })
-        // map.addLayer(
-        //     {
-        //         'id': lyrId,
-        //         'type': 'circle',
-        //         // 'sprite':'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
-        //         'source': lyrId,
-        //         // filter: ['has', 'point_count'],
-        //         'layout': {
-        //         //     'icon-image': 'custom-marker',
-        //         // //     // get the title name from the source's "title" property
-        //         //     'text-field': 
-        //         // //     // ['case',['has', 'cluster'],
-        //         // //     // ['to-string',['get', 'point_count']],
-        //         //     ['get', 'Applicant']
-        //         // //     // ]   
-        //         //     ,
-        //         // //     // // ['match',['get', 'point_count'],1,
-        //         // //     // // ['get', 'Applicant'],['to-string',['get', 'point_count']]],
-        //         //     'text-font': [
-        //         //     'Open Sans Semibold',
-        //         //     'Arial Unicode MS Bold'
-        //         //     ],
-        //         //     'text-offset': [0, 1.25],
-        //         //     'text-anchor': 'top',
-        //             'visibility':'none'
-        //             }
-        //             ,paint: {
-        //                 'circle-color':'white'
-        //         // "text-color": [
-        //         //         'match',
-        //         //         ["get", "Status"], "Application Approved",
-        //         //         'rgb(21, 255, 0)','yellow' ]
-        //         }
-        //     }
-        //     // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        //     )
+            type: 'geojson',
+            data: dir+encodeURIComponent(lyrId)+'.geojson',
+            cluster: true,
+            // clusterMaxZoom: 10, // Max zoom to cluster points on
+            // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
+        });
 
         map.addLayer(
             {
@@ -1513,9 +1460,9 @@ const loadErUp = async () => { //had to strip out to separate func to reload aft
     })
 }
 
-
 map.on('load', async ()=> {
-    await loadErUp()
+    await loadMapboxImage(map, 'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png', 'custom-marker');
+    await loadLayers()
     
     legendConfig = {
         collapsed: true,
@@ -1581,7 +1528,7 @@ const restyle = async (layerId) => {
     await map.setStyle('mapbox://styles/mapbox/' + layerId);
     
     // await sleep(15)
-    await loadErUp()
+    await loadLayers()
 
     //refresh lyrs
     let params: any = await new URLSearchParams(window.location.search)
@@ -1619,7 +1566,7 @@ for (const input of inputs) {
     input.onclick = async (layer) => {
 
         map.once("styledata", async ()=> {
-            await loadErUp()
+            await loadLayers()
 
             //refresh lyrs
             let params: any = await new URLSearchParams(window.location.search)

@@ -1,3 +1,4 @@
+import type mapboxgl from "mapbox-gl";
 
 export function zip(a, b): any[][] {
     return Array.from(a)
@@ -6,6 +7,19 @@ export function zip(a, b): any[][] {
 
 export function isString(value) {
     return typeof value === 'string' || value instanceof String;
+}
+
+export function loadMapboxImage(map: mapboxgl.Map, url: string, name: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        map.loadImage(url, (error, image) => {
+            if (error || !image) {
+                reject(error ?? 'Failed to load image');
+            } else {
+                map.addImage(name, image);
+                resolve();
+            }
+        })
+    });
 }
 
 export function getAllChecked(boxes) {
@@ -117,7 +131,7 @@ export function isScrolledIntoView(el) {
     return isVisible;
 }
 
-export async function fetchJSON (url) {
+export async function fetchJSON(url) {
     let response = await fetch(url);
     let data = await response.json();
     //TODO error handling
@@ -125,15 +139,15 @@ export async function fetchJSON (url) {
     return data;
 }
 
-export const fly = async (map,x,y,z,sleep=2000)=> {
+export const fly = async (map, x, y, z, sleep = 2000) => {
     await new Promise(r => setTimeout(r, sleep));
     await map.flyTo({
-        center: [x,y],
+        center: [x, y],
         zoom: z,
         essential: true // this animation is considered essential with respect to prefers-reduced-motion
-        });
+    });
 }
 
 export const sleep = async (time_s) => {
-    await new Promise(r => setTimeout(r, time_s*1000))
+    await new Promise(r => setTimeout(r, time_s * 1000))
 }
