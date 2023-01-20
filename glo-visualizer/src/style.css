@@ -7,7 +7,8 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 100%;
+  right: 0; 
+  left: 0;
 }
 
 #title {
@@ -67,10 +68,10 @@ background: #3074a4;
   margin: 0px auto;
   word-wrap: anywhere;
   white-space: pre-wrap;
-  padding: 2px;
+  /* padding: 2px; */
   border: none;
   border-radius: 0px;
-  font-size: 14px;
+  font-size: 12px;
   text-align: center;
   color: rgb(255, 255, 255);
   background: rgba(0, 0, 0, 0.4);
