@@ -1448,10 +1448,15 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     // Obervations
     const observations = [
         {
-            id: 'NOAA Gauges', 
+            id: 'USGS Stream Gauges', 
+            url: `${janlayerdir}${encodeURIComponent('USGS Gages')}/Neches_gages_fixed.geojson`,
+            color: '#446100'
+        },
+        {
+            id: 'NOAA Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges_fixed.geojson`,
             color: '#489DD5',
-        }
+        }, 
     ]; 
 
     observations.forEach(o => {
@@ -1493,6 +1498,24 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                     // @ts-ignore
                     .setHTML(`<strong>${event.features[0].properties.Location}</strong><br><span>${event.features[0].properties.GaugeLID}</span>`)
                     .addTo(map);
+                // Change the cursor style as a UI indicator.
+                map.getCanvas().style.cursor = 'pointer';
+                // @ts-ignore
+            } else if (event.features[0].properties.STATION_NM) {
+                popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(`<strong>${event.features[0].properties.STATION_NM}</strong><br><span>${event.features[0].properties.SITE_NO}</span>`)
+                .addTo(map);
+                // Change the cursor style as a UI indicator.
+                map.getCanvas().style.cursor = 'pointer';
+            // @ts-ignore
+            } else if (event.features[0].properties.Name) {
+                popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
+                .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
             }
