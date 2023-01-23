@@ -1443,7 +1443,61 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         })
-    })
+    }); 
+
+    // Obervations
+    const observations = [
+        {
+            id: 'NOAA Gauges', 
+            url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges_fixed.geojson`,
+            color: '#489DD5',
+        }
+    ]; 
+
+    observations.forEach(o => {
+        map.addSource(o.id, {
+            type: 'geojson',
+            data: o.url,
+        });
+        map.addLayer({
+            id: o.id, 
+            source: o.id,
+            type: 'circle', 
+            paint: {
+                "circle-color": o.color, 
+                "circle-radius": 6,
+            }, 
+            layout: {
+                'visibility': 'none',
+            },
+        });
+    
+        legendlyrs.push({
+            id: o.id,
+            hidden: false,
+            group: "Observations",
+            directory: "Legend"
+        });
+
+        map.on('mouseleave', o.id, () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+    
+        map.on('mouseenter', o.id, (event) => {
+            console.log(event.features);
+            // @ts-ignore
+            if (event.features[0].properties.Location) {
+                popup
+                    .setLngLat(event.lngLat)
+                    // @ts-ignore
+                    .setHTML(`<strong>${event.features[0].properties.Location}</strong><br><span>${event.features[0].properties.GaugeLID}</span>`)
+                    .addTo(map);
+                // Change the cursor style as a UI indicator.
+                map.getCanvas().style.cursor = 'pointer';
+            }
+        })
+    });
 }
 
 map.on('load', async () => {
