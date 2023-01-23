@@ -647,7 +647,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     lyrId = 'CDBG-MIT Proposed Projects'
 
-
     map.addSource(lyrId + '-src', {
         type: 'geojson',
         data: dir + encodeURIComponent(lyrId) + '.geojson',
@@ -711,27 +710,8 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             // children:[lyrId+'-fill'],
             directory: "Legend"
         }
-    )
+    );
 
-    // inspect a cluster on click
-    // // map.on('click', lyrId, (e) => {
-    // //     const features = map.queryRenderedFeatures(e.point, {
-    // //         layers: [lyrId]
-    // //     });
-    // //     const clusterId = e.features[0].properties.cluster_id;
-    // //     console.log(clusterId)
-    // //     map.getSource(lyrId+'-src').getClusterExpansionZoom(
-    // //         clusterId,
-    // //         (err, zoom) => {
-    // //         if (err) console.log(err);
-                    
-    // //         map.easeTo({
-    // //             center: e.features[0].geometry.coordinates,
-    // //             zoom: zoom
-    // //             });
-    // //             }
-    // //     );
-    // // });
     map.on('mouseleave', lyrId, () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
@@ -755,88 +735,65 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         }
-        // else {
-        //     // console.log(supercluster)
-        //     const features = map.queryRenderedFeatures(event.point, {
-        //     layers: [lyrId]
-        //     });
-        //     var clusterId = event.features[0].properties.cluster_id
-        //     point_count = event.features[0].properties.point_count
-        //     console.log(clusterId,point_count)
-        //     const clusterSource = map.getSource(lyrId+'-src')
-        //     console.log(clusterSource)
-        //     clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-        //         console.log('getClusterLeaves', err, aFeatures);
-        //     })
+    });
 
-        //     // let feats=event.features
-        //     // console.log(feats)
-        //     // lbl = feats.map((x)=>x.properties.Site_Title)
-        //     // console.log(lbl)
-        //     // popup
-        //     // .setLngLat(event.lngLat)
-        //     // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-        //     // .addTo(map);
-        //     // Change the cursor style as a UI indicator.
-        //     map.getCanvas().style.cursor = 'pointer';
-        // }
+    lyrId = 'TWDB FIF Projects'
+
+    map.addSource(lyrId + '-src', {
+        type: 'geojson',
+        data: `${janlayerdir}${encodeURIComponent('FIF CAT 1 Combined Shapefile')}/${encodeURIComponent('FIF CAT 1 Project Areas_fixed.geojson')}`,
+        // clusterMaxZoom: 10, // Max zoom to cluster points on
+        // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
+    });
+
+    map.addLayer({
+        id: lyrId,
+        source: lyrId + '-src',
+        type: 'fill',
+        paint: {
+            "fill-color": '#3F556D',
+            'fill-opacity': 0.6,
+        },
+        layout: {
+            'visibility': 'none',
+        }
     })
 
-    // function sourceCallback(map) {
-    //     console.log('callin back')
-    //     // assuming 'map' is defined globally, or you can use 'this'
-    //     if (map.getSource(lyrId+'-src') && map.isSourceLoaded(lyrId+'-src')) {
-    //         console.log('source loaded!');
-                    
-    //         map.on('mouseleave', lyrId, () => {
-    //             map.getCanvas().style.cursor = '';
-    //             popup.remove();
-    //             });
+    legendlyrs.push(
+        {
+            id: lyrId,
+            hidden: false,
+            group: "Mitigation Projects",
+            // children:[lyrId+'-fill'],
+            directory: "Legend"
+        }
+    )
 
-    //         map.on('mouseenter', lyrId, (event) => {
-    //             if (event.features[0].properties.Site_Title!=undefined) {
-    //                 popup
-    //                 .setLngLat(event.lngLat)
-    //                 .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-    //                 .addTo(map);
-    //                 // Change the cursor style as a UI indicator.
-    //                 map.getCanvas().style.cursor = 'pointer';
-    //             }
-    //             else {
-    //                 // console.log(supercluster)
-    //                 const features = map.queryRenderedFeatures(event.point, {
-    //                 layers: [lyrId]
-    //                 });
-    //                 var clusterId = event.features[0].properties.cluster_id
-    //                 point_count = event.features[0].properties.point_count
-    //                 console.log(clusterId,point_count)
-    //                 const clusterSource = map.getSource(lyrId+'-src')
-    //                 console.log(clusterSource)
-    //                 clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-    //                     console.log('getClusterLeaves', err, aFeatures);
-    //                 })
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
 
-    //                 // let feats=event.features
-    //                 // console.log(feats)
-    //                 // lbl = feats.map((x)=>x.properties.Site_Title)
-    //                 // console.log(lbl)
-    //                 // popup
-    //                 // .setLngLat(event.lngLat)
-    //                 // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-    //                 // .addTo(map);
-    //                 // Change the cursor style as a UI indicator.
-    //                 map.getCanvas().style.cursor = 'pointer';
-    //             }
-    //         })
-    //     }
-    // }
+    map.on('mousemove', lyrId, (event) => {
+        let features = event.features as Array<any>;
+        let html = '';
 
-    // map.on('sourcedata', (map)=>{sourceCallback(map)})
-    // map.onSourceAdded()
-            
-    // // })
-    // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
-    
+        features.forEach(f => {
+            if (f.properties.Project_Na) {
+                html += `<span>${f.properties.Project_Nu}: </span><strong>${f.properties.Project_Na}</strong><br>`;
+            }
+        });
+
+        if (html.length > 0) {
+            popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(html)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+        }
+    })    
     
     const lyrz = [
         {
@@ -1007,42 +964,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             // children:[lyrId+'-fill'],
             directory: "Legend"
         }
-    )
-
-    legendlyrs.push({
-        id: lyrId,
-        hidden: false,
-        group: "Neches Watershed",
-        directory: "Legend"
-    })
-
-    // Mapbox doesn't support line-width for polygons, so I added these line versions to the S3 bucket:
-    // Neches counties, Jefferson county drainage districts, FIF Cat 1 project areas, and Regional flood planning groups 
-    // lyrId = 'Counties Within Neches River Watershed'
-    // map.addSource(lyrId, {
-    //     type: "geojson",
-    //     data: janLayerDir2 + "Country+boundaries/Neches_Counties_lines_fixed.geojson"
-    // })
-    // map.addLayer(
-    //     {
-    //         id: lyrId,
-    //         source: lyrId,
-    //         type: 'line',
-    //         layout: {},
-    //         paint: {
-    //             'line-color': 'rgb(0, 255, 247)',
-    //             'line-opacity': 1,
-    //             "line-width": 1.3
-    //         }
-    //     }
-    // )
-
-    // legendlyrs.push({
-    //     id: lyrId,
-    //     hidden: false,
-    //     group: "Neches Watershed",
-    //     directory: "Legend"
-    // })
+    );
 
     // National Land Cover Database
     lyrId = 'Land Cover'
@@ -1382,7 +1304,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             }
 
             hoveredId = e.features![0].id ?? null;
-            // console.log(typeof hoveredId)
+
             map.setFeatureState(
                 { source: 'zipcodes', id: hoveredId ?? undefined },
                 { hover: true }
@@ -1503,19 +1425,19 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 // @ts-ignore
             } else if (event.features[0].properties.STATION_NM) {
                 popup
-                .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.STATION_NM}</strong><br><span>${event.features[0].properties.SITE_NO}</span>`)
-                .addTo(map);
+                    .setLngLat(event.lngLat)
+                    // @ts-ignore
+                    .setHTML(`<strong>${event.features[0].properties.STATION_NM}</strong><br><span>${event.features[0].properties.SITE_NO}</span>`)
+                    .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
-            // @ts-ignore
+                // @ts-ignore
             } else if (event.features[0].properties.Name) {
                 popup
-                .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
-                .addTo(map);
+                    .setLngLat(event.lngLat)
+                    // @ts-ignore
+                    .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
+                    .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
             }
