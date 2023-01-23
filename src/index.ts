@@ -23,52 +23,51 @@ const replossId = 'FEMA Severe Repetitive Loss Properties'
 const layerList = document.getElementById('menu');
 const inputs = layerList?.getElementsByTagName('input');
 
-let [x0,y0,z0] = [-94.4,30,8]
+let [x0, y0, z0] = [-94.4, 30, 8]
     
 let dir = 'http://glo-repetitiveloss.s3-website.us-east-2.amazonaws.com/';
-let lyrdir = dir +'bringtheheat/';
-let huclyrdir = dir+'HUC/';
+let lyrdir = dir + 'bringtheheat/';
+let huclyrdir = dir + 'HUC/';
 let janlayerdir = dir + 'layers_jan_2023/';
-let janLayerDir2 = 'https://glo-repetitiveloss.s3.us-east-2.amazonaws.com/layers_jan_2023/';
 
-const map =  new mapboxgl.Map({
+const map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/dark-v10',
-    center: [x0,y0],
+    center: [x0, y0],
     zoom: z0,
 });
 
-function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
+function addHeatmap(map, heatlyr, q0 = 1, q1 = 20, q2 = 300) {
     // q0-2: quantile distribution of heatlyr.densityAttr to base the heatmap color ramp off, (min, q50, max)
     let lyrId = heatlyr.id
-    if (!heatlyr.hasOwnProperty('data') ) {
-            heatlyr.data = lyrdir+encodeURIComponent(lyrId)+'.geojson'
-        }
-        if (!heatlyr.hasOwnProperty('densityAttr') ) {
-            heatlyr.densityAttr = null
-        }
-        if (!heatlyr.hasOwnProperty('colormap') ) {
-            heatlyr.colormap = VIRIDIS
-        }
-        if (!heatlyr.hasOwnProperty('lblPrefix') ) {
-            heatlyr.lblPrefix = ''
-        }
-        if (!heatlyr.hasOwnProperty('lblSuff') ) {
-            heatlyr.lblSuff = ''
-        }
+    if (!heatlyr.hasOwnProperty('data')) {
+        heatlyr.data = lyrdir + encodeURIComponent(lyrId) + '.geojson'
+    }
+    if (!heatlyr.hasOwnProperty('densityAttr')) {
+        heatlyr.densityAttr = null
+    }
+    if (!heatlyr.hasOwnProperty('colormap')) {
+        heatlyr.colormap = VIRIDIS
+    }
+    if (!heatlyr.hasOwnProperty('lblPrefix')) {
+        heatlyr.lblPrefix = ''
+    }
+    if (!heatlyr.hasOwnProperty('lblSuff')) {
+        heatlyr.lblSuff = ''
+    }
     map.addSource(lyrId, {
         'type': 'geojson',
         'data': heatlyr.data
     })
 
-    if (heatlyr.densityAttr!=null) {
+    if (heatlyr.densityAttr != null) {
         map.addLayer(
             {
-                'id': lyrId+'',
+                'id': lyrId + '',
                 'type': 'heatmap',
                 'source': lyrId,
                 // 'maxzoom': 8,
-                'layout':{'visibility':'none'},
+                'layout': { 'visibility': 'none' },
                 'paint': {
                     // Increase the heatmap weight based on frequency and property magnitude
                     'heatmap-weight': [
@@ -129,11 +128,11 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
 
         map.addLayer(
             {
-                'id': lyrId+'-point',
+                'id': lyrId + '-point',
                 'type': 'circle',
                 'source': lyrId,
                 'minzoom': 10,
-                'layout':{'visibility':'none'},
+                'layout': { 'visibility': 'none' },
                 'paint': {
                     // Size circle radius by earthquake magnitude and zoom level
                     'circle-radius': [
@@ -141,9 +140,9 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
                         ['linear'],
                         ['zoom'],
                         7,
-                        ['*',0.6, ['interpolate', ['linear'], ['get', heatlyr.densityAttr], q0, 4, q1, 40, q2, 70] ],
+                        ['*', 0.6, ['interpolate', ['linear'], ['get', heatlyr.densityAttr], q0, 4, q1, 40, q2, 70]],
                         22,
-                        ['*',0.6, ['interpolate', ['linear'], ['get', heatlyr.densityAttr], q0, 5, q1, 100, q2, 150] ]
+                        ['*', 0.6, ['interpolate', ['linear'], ['get', heatlyr.densityAttr], q0, 5, q1, 100, q2, 150]]
                     ],
                     // Color circle by earthquake magnitude
                     // 'circle-color': [
@@ -171,17 +170,17 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
         );
     }
     else {//no density attr
-        let s0=5
-        let s1=7
+        let s0 = 5
+        let s1 = 7
         map.addLayer(
             {
-                'id': lyrId+'',
+                'id': lyrId + '',
                 'type': 'heatmap',
                 'source': lyrId,
                 // 'maxzoom': 8,
-                'layout':{'visibility':'none'},
+                'layout': { 'visibility': 'none' },
                 'paint': {
-                    'heatmap-weight':0.02,
+                    'heatmap-weight': 0.02,
                     // Increase the heatmap color weight weight by zoom level
                     // heatmap-intensity is a multiplier on top of heatmap-weight
                     'heatmap-intensity': [
@@ -209,9 +208,9 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
                         1,
                         4,
                         7, 
-                        s0*3,
+                        s0 * 3,
                         22,
-                        s1*3
+                        s1 * 3
                     ],
                     // Transition from heatmap to circle layer by zoom level
                     // 'heatmap-opacity': [
@@ -230,11 +229,11 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
 
         map.addLayer(
             {
-                'id': lyrId+'-point',
+                'id': lyrId + '-point',
                 'type': 'circle',
                 'source': lyrId,
                 'minzoom': 10,
-                'layout':{'visibility':'none'},
+                'layout': { 'visibility': 'none' },
                 'paint': {
                     // Size circle radius by earthquake magnitude and zoom level
                     'circle-radius': [
@@ -277,29 +276,29 @@ function addHeatmap(map,heatlyr,q0=1,q1=20,q2=300) {
         //     .addTo(map);
         // });     
 
-        map.on('mouseleave', lyrId+'-point', () => {
+        map.on('mouseleave', lyrId + '-point', () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
-            });
+        });
 
-        map.on('mouseenter', lyrId+'-point', (event) => {
+        map.on('mouseenter', lyrId + '-point', (event) => {
             popup
-            .setLngLat(event.lngLat)
-            .setHTML(`<strong>${heatlyr.lblPrefix}${lyrId}${heatlyr.lblSuff}</strong>`)
-            .addTo(map);
+                .setLngLat(event.lngLat)
+                .setHTML(`<strong>${heatlyr.lblPrefix}${lyrId}${heatlyr.lblSuff}</strong>`)
+                .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         })
     }
 }
 
-const tutorial = async(map) => {
-    await fly(map,-94.1412,30.1029,12)
+const tutorial = async (map) => {
+    await fly(map, -94.1412, 30.1029, 12)
     await sleep(3.5)
     map.addSource('pointer', {
-    'type': 'geojson',  //TODO mouse outline
-    // 'type':'Point',
-    'data': [0,0]//pointerData(x0,y0)
+        'type': 'geojson',  //TODO mouse outline
+        // 'type':'Point',
+        'data': [0, 0]//pointerData(x0,y0)
     });
     // console.log(pointerData(x0,y0))
     // map.loadImage(
@@ -309,53 +308,53 @@ const tutorial = async(map) => {
         
     //     // Add the image to the map style.
     //     map.addImage('mouse', image);
-        map.addLayer({
-            'id': 'pointer',
-            'source': 'pointer',
-            // 'type':'fill', //TODO mouse outline
-            // 'paint': {
-            // 'fill-color': 'white'
-            // }
-            'type': 'circle',
-            'paint': {
+    map.addLayer({
+        'id': 'pointer',
+        'source': 'pointer',
+        // 'type':'fill', //TODO mouse outline
+        // 'paint': {
+        // 'fill-color': 'white'
+        // }
+        'type': 'circle',
+        'paint': {
             'circle-radius': 6,
             'circle-color': 'white'
-            }
-            // 'type': 'symbol',
-            // 'layout': {
-            //     'icon-image':'mouse',
-            //     'icon-size':.25
-            // }
-        })
+        }
+        // 'type': 'symbol',
+        // 'layout': {
+        //     'icon-image':'mouse',
+        //     'icon-size':.25
+        // }
+    })
 
     //     }
     // )
 
-    let routes = await fetchJSON(lyrdir+'pointerpath.geojson')
+    let routes = await fetchJSON(lyrdir + 'pointerpath.geojson')
     routes = routes.features
     routes.sort((a, b) => (a.properties.route > b.properties.route) ? 1 : -1)
     // console.log(routes)
 
-    const parseRoute = (feat)=> {
+    const parseRoute = (feat) => {
         let route = feat.geometry.coordinates
-        if (route.length===1) {//multilinestrings
-            route=route[0]
+        if (route.length === 1) {//multilinestrings
+            route = route[0]
         }
         return route
     }
 
     //TODO zip is hardcoded, replace this entirely
-    const zips = routes.map(feat=>feat.properties.zip)
+    const zips = routes.map(feat => feat.properties.zip)
     routes = routes.map(parseRoute)
     // console.log(zips)
     //routes will be [ [[x1,y1],[x2,y2]] , [[x1,y1],...] , ... ]
 
-    function seq1(map,route) {
+    function seq1(map, route) {
         let pos = route.shift()
         // console.log(pointerData(...pos))
         // pos = parseRoute(pos)
         // @ts-ignore
-        map.getSource('pointer').setData( pointerData(...pos) );
+        map.getSource('pointer').setData(pointerData(...pos));
         
         // Request the next frame of the animation.
         return route
@@ -370,74 +369,74 @@ const tutorial = async(map) => {
         let zyp: any;
 
         // your draw code
-        if(route === undefined){ // is there an animation 
-        // no animation 
-            if(routes.length > 0){  // are there any animations on the stack
+        if (route === undefined) { // is there an animation 
+            // no animation 
+            if (routes.length > 0) {  // are there any animations on the stack
                 route = routes.shift(); // yes get the first anim
                 // console.log(zips)
                 zyp = zips.shift() //get the associated zip code to simulate mouse hover
                 // console.log(zyp)
-            }else{
+            } else {
                 playing = false;  // no animations to play so stop and exit
                 return;
             }
         }
-        if (route.length==1) {
+        if (route.length == 1) {
             lastcoord = route[0] //grab this before it gets Shifted off in seq1
         }
-        route = seq1(map,route)
-        if(route.length===0){ // call the anim and check if returns true;
+        route = seq1(map, route)
+        if (route.length === 0) { // call the anim and check if returns true;
             // animation ended so get the next animation function if there are any
             // console.log(zyp)
-                await map.setFeatureState(
-                    { source: 'zipcodes', id: zyp },
-                    { hover: true }
-                    )
+            await map.setFeatureState(
+                { source: 'zipcodes', id: zyp },
+                { hover: true }
+            )
 
-                const aray = await reptLossData.features
-                const reptloss = await aray[aray.map((x)=>x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
-                // console.log(reptloss)
-                popup
+            const aray = await reptLossData.features
+            const reptloss = await aray[aray.map((x) => x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
+            // console.log(reptloss)
+            popup
                 .setLngLat(lastcoord)
                 .setHTML(`<strong>Repetitive Loss Properties:</strong> ${reptloss}<br>
                         in zip code ${zyp}`)
                 .addTo(map)
-                map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
-                map.setLayoutProperty('zipcodes', 'visibility', 'visible')
+            map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
+            map.setLayoutProperty('zipcodes', 'visibility', 'visible')
 
-                await sleep(2.7)
+            await sleep(2.7)
 
-                // testhover = await map.getFeatureState({
-                // source: 'zipcodes',
-                // // sourceLayer: 'zipcodes',
-                // id: zyp
-                // })
-                // console.log(testhover)
+            // testhover = await map.getFeatureState({
+            // source: 'zipcodes',
+            // // sourceLayer: 'zipcodes',
+            // id: zyp
+            // })
+            // console.log(testhover)
                 
-                // console.log('close')
-                await map.setFeatureState(
-                    { source: 'zipcodes', id: zyp },
-                    { hover: false }
-                    )
-                popup.remove()
-                map.setLayoutProperty('zipcodes', 'visibility', 'none')
+            // console.log('close')
+            await map.setFeatureState(
+                { source: 'zipcodes', id: zyp },
+                { hover: false }
+            )
+            popup.remove()
+            map.setLayoutProperty('zipcodes', 'visibility', 'none')
 
-            if(routes.length > 0){
+            if (routes.length > 0) {
 
                 route = routes.shift(); // get the next anim
                 zyp = zips.shift()
-            }else{
+            } else {
                 // console.log('fin')
                 playing = false; // no more animations so stop
                 route = undefined; // ready for new animtion
-                map.setLayoutProperty('pointer',  'visibility','none')
+                map.setLayoutProperty('pointer', 'visibility', 'none')
 
                 // await sleep(.2)
-                fly(map,x0,y0,z0)
+                fly(map, x0, y0, z0)
             }
         }   
 
-        if(playing){
+        if (playing) {
             requestAnimationFrame(update); // get next frame
         }
     }
@@ -449,63 +448,63 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     //3d buildings
     // Insert the layer beneath any symbol layer.
-    if(['Mapbox Light','Mapbox Dark'].indexOf(map.getStyle().name! ) > -1) {
+    if (['Mapbox Light', 'Mapbox Dark'].indexOf(map.getStyle().name!) > -1) {
     
         const layers = map.getStyle().layers;
         const labelLayerId = layers.find(
-        (layer) => layer.type === 'symbol' && layer.layout!['text-field']
+            (layer) => layer.type === 'symbol' && layer.layout!['text-field']
         )!.id;
         
         // The 'building' layer in the Mapbox Streets
         // vector tileset contains building height data
         // from OpenStreetMap.
         map.addLayer(
-        {
-        'id': 'add-3d-buildings',
-        'source': 'composite',
-        'source-layer': 'building',
-        'filter': ['==', 'extrude', 'true'],
-        'type': 'fill-extrusion',
-        'minzoom': 15,
-        'paint': {
-        'fill-extrusion-color': '#aaa',
+            {
+                'id': 'add-3d-buildings',
+                'source': 'composite',
+                'source-layer': 'building',
+                'filter': ['==', 'extrude', 'true'],
+                'type': 'fill-extrusion',
+                'minzoom': 15,
+                'paint': {
+                    'fill-extrusion-color': '#aaa',
         
-        // Use an 'interpolate' expression to
-        // add a smooth transition effect to
-        // the buildings as the user zooms in.
-        'fill-extrusion-height': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        15,
-        0,
-        15.05,
-        ['get', 'height']
-        ],
-        'fill-extrusion-base': [
-        'interpolate',
-        ['linear'],
-        ['zoom'],
-        15,
-        0,
-        15.05,
-        ['get', 'min_height']
-        ],
-        'fill-extrusion-opacity': 0.6
-        }
-        },
-        labelLayerId
+                    // Use an 'interpolate' expression to
+                    // add a smooth transition effect to
+                    // the buildings as the user zooms in.
+                    'fill-extrusion-height': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'height']
+                    ],
+                    'fill-extrusion-base': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        15,
+                        0,
+                        15.05,
+                        ['get', 'min_height']
+                    ],
+                    'fill-extrusion-opacity': 0.6
+                }
+            },
+            labelLayerId
         );
     }
 
     // Add a geojson point source.
     // Heatmap layers also work with a vector tile source.
-    reptLossData = await fetchJSON(lyrdir+'repetitiveLoss.geojson')
+    reptLossData = await fetchJSON(lyrdir + 'repetitiveLoss.geojson')
 
     map.addSource('zipcodes', {
         'type': 'geojson',
-        'data': lyrdir+'zip.geojson',
-        'promoteId':'zip'
+        'data': lyrdir + 'zip.geojson',
+        'promoteId': 'zip'
         // 'generateId':true
     })
     map.addLayer(
@@ -518,22 +517,22 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'fill-color': 'blue',
                 // 'fill-width': 3,
                 'fill-opacity': [
-                'case',
-                ['boolean', ['feature-state', 'hover'], false],
-                .3,
-                0
+                    'case',
+                    ['boolean', ['feature-state', 'hover'], false],
+                    .3,
+                    0
                 ]
             },
-            'layout': { 'visibility':'none'} //on load
+            'layout': { 'visibility': 'none' } //on load
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+    )
 
     let lyrId = 'FEMA NHD Streams'
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
     map.addSource(lyrId, {
         'type': 'geojson',
-        'data': dir+encodeURIComponent(lyrId)+'.geojson',
+        'data': dir + encodeURIComponent(lyrId) + '.geojson',
     })
     map.addLayer(
         {
@@ -541,41 +540,41 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             'type': 'line',
             'source': lyrId,
             paint: {
-                'line-color':'rgb(60, 129, 255)',
-                    "line-width": [
+                'line-color': 'rgb(60, 129, 255)',
+                "line-width": [
                     'match',
                     ["get", "GNIS_Name"], "nan",
                     .5,
                     3
-                    ],
-                    "line-opacity": .8
+                ],
+                "line-opacity": .8
             },
-            'layout': { 'visibility':'none'} //on load
+            'layout': { 'visibility': 'none' } //on load
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+    )
     legendlyrs.push(
         {
-        id: lyrId,
-        hidden: false,
-        group: "Waterways",
-        // children:[lyrId+'-fill'],
-        directory: "Legend"
+            id: lyrId,
+            hidden: false,
+            group: "Waterways",
+            // children:[lyrId+'-fill'],
+            directory: "Legend"
         }
-        )
+    )
     map.on('mouseleave', lyrId, () => {
         map.getCanvas().style.cursor = '';
         popup.remove();
-        });
+    });
 
     map.on('mouseenter', lyrId, (event) => {
         // @ts-ignore
-        if (event.features[0].properties.GNIS_Name!='nan') {
+        if (event.features[0].properties.GNIS_Name != 'nan') {
             popup
-            .setLngLat(event.lngLat)
-            // @ts-ignore
-            .setHTML(`<strong>${event.features[0].properties.GNIS_Name}</strong>`)
-            .addTo(map);
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(`<strong>${event.features[0].properties.GNIS_Name}</strong>`)
+                .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         }
@@ -649,225 +648,232 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     lyrId = 'CDBG-MIT Proposed Projects'
 
 
-        map.addSource(lyrId+'-src', {
-            type: 'geojson',
-            data: dir+encodeURIComponent(lyrId)+'.geojson',
-            cluster: true,
-            // clusterMaxZoom: 10, // Max zoom to cluster points on
-            // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
-        });
+    map.addSource(lyrId + '-src', {
+        type: 'geojson',
+        data: dir + encodeURIComponent(lyrId) + '.geojson',
+        cluster: true,
+        // clusterMaxZoom: 10, // Max zoom to cluster points on
+        // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
+    });
 
-        map.addLayer(
-            {
-                'id': lyrId,
-                'type': 'symbol',
-                // 'sprite':'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
-                'source': lyrId+'-src',
-                // filter: ['has', 'point_count'],
-                'layout': {
-                    'icon-image': 'custom-marker',
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'symbol',
+            // 'sprite':'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png',
+            'source': lyrId + '-src',
+            // filter: ['has', 'point_count'],
+            'layout': {
+                'icon-image': 'custom-marker',
                 //     // get the title name from the source's "title" property
-                    'text-field': 
+                'text-field': 
                     // ['format',
-                    ['case',['has', 'cluster'],
-                    ['to-string',['get', 'point_count']],
-                    ['get', 'Applicant']
+                    ['case', ['has', 'cluster'],
+                        ['to-string', ['get', 'point_count']],
+                        ['get', 'Applicant']
                     ],
-                    // 'text-halo-blur':40,
-                    // 'text-halo-color':'black',
-                    // {'text-shadow': '-8px -3px 4px black'}]counties
-                    // , 3px -3px 4px black, -3px 3px 4px black, 3px 3px 4px black;}]   
+                // 'text-halo-blur':40,
+                // 'text-halo-color':'black',
+                // {'text-shadow': '-8px -3px 4px black'}]counties
+                // , 3px -3px 4px black, -3px 3px 4px black, 3px 3px 4px black;}]   
                     
                 //     // // ['match',['get', 'point_count'],1,
                 //     // // ['get', 'Applicant'],['to-string',['get', 'point_count']]],
-                    'text-font': [
+                'text-font': [
                     'Open Sans Semibold',
                     'Arial Unicode MS Bold'
-                    ],
-                    'text-offset': [0, 1.25],
-                    'text-anchor': 'top',
-                    'visibility':'none'
-                    }
-                    ,paint: {
+                ],
+                'text-offset': [0, 1.25],
+                'text-anchor': 'top',
+                'visibility': 'none'
+            }
+            , paint: {
                 "text-color": [
-                        'case',
-                        ['has','Status'],
-                        [
+                    'case',
+                    ['has', 'Status'],
+                    [
                         'match',
                         ["get", "Status"], "Application Approved",
-                        'rgb(21, 255, 0)','yellow' ],
-                        'white'],
-                'text-halo-width':2,
-                'text-halo-blur':1,
-                'text-halo-color':'black',
-                }
+                        'rgb(21, 255, 0)', 'yellow'],
+                    'white'],
+                'text-halo-width': 2,
+                'text-halo-blur': 1,
+                'text-halo-color': 'black',
             }
-            // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-            )
-            legendlyrs.push(
-                {
-                id: lyrId,
-                hidden: false,
-                group: "Mitigation Projects",
-                // children:[lyrId+'-fill'],
-                directory: "Legend"
-                }
-                )
+        }
+        // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+    )
+    legendlyrs.push(
+        {
+            id: lyrId,
+            hidden: false,
+            group: "Mitigation Projects",
+            // children:[lyrId+'-fill'],
+            directory: "Legend"
+        }
+    )
 
-                // inspect a cluster on click
-            // // map.on('click', lyrId, (e) => {
-            // //     const features = map.queryRenderedFeatures(e.point, {
-            // //         layers: [lyrId]
-            // //     });
-            // //     const clusterId = e.features[0].properties.cluster_id;
-            // //     console.log(clusterId)
-            // //     map.getSource(lyrId+'-src').getClusterExpansionZoom(
-            // //         clusterId,
-            // //         (err, zoom) => {
-            // //         if (err) console.log(err);
+    // inspect a cluster on click
+    // // map.on('click', lyrId, (e) => {
+    // //     const features = map.queryRenderedFeatures(e.point, {
+    // //         layers: [lyrId]
+    // //     });
+    // //     const clusterId = e.features[0].properties.cluster_id;
+    // //     console.log(clusterId)
+    // //     map.getSource(lyrId+'-src').getClusterExpansionZoom(
+    // //         clusterId,
+    // //         (err, zoom) => {
+    // //         if (err) console.log(err);
                     
-            // //         map.easeTo({
-            // //             center: e.features[0].geometry.coordinates,
-            // //             zoom: zoom
-            // //             });
-            // //             }
-            // //     );
-            // // });
-                    map.on('mouseleave', lyrId, () => {
-                        map.getCanvas().style.cursor = '';
-                        popup.remove();
-                        });
+    // //         map.easeTo({
+    // //             center: e.features[0].geometry.coordinates,
+    // //             zoom: zoom
+    // //             });
+    // //             }
+    // //     );
+    // // });
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
 
-                    map.on('mousemove', lyrId, (event) => {
-                        // @ts-ignore
-                        if ((event.features[0].properties.cluster ?? false) === true) {
-                            popup
-                            .setLngLat(event.lngLat)
-                            // @ts-ignore
-                            .setHTML(`<strong>${event.features[0].properties.point_count} Projects</strong><br>`)
-                            .addTo(map);
-                        // @ts-ignore
-                        } else if (event.features[0].properties.Site_Title!==undefined) {
-                            popup
-                            .setLngLat(event.lngLat)
-                            // @ts-ignore
-                            .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-                            .addTo(map);
-                            // Change the cursor style as a UI indicator.
-                            map.getCanvas().style.cursor = 'pointer';
-                        }
-                        // else {
-                        //     // console.log(supercluster)
-                        //     const features = map.queryRenderedFeatures(event.point, {
-                        //     layers: [lyrId]
-                        //     });
-                        //     var clusterId = event.features[0].properties.cluster_id
-                        //     point_count = event.features[0].properties.point_count
-                        //     console.log(clusterId,point_count)
-                        //     const clusterSource = map.getSource(lyrId+'-src')
-                        //     console.log(clusterSource)
-                        //     clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-                        //         console.log('getClusterLeaves', err, aFeatures);
-                        //     })
+    map.on('mousemove', lyrId, (event) => {
+        // @ts-ignore
+        if ((event.features[0].properties.cluster ?? false) === true) {
+            popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(`<strong>${event.features[0].properties.point_count} Projects</strong><br>`)
+                .addTo(map);
+            // @ts-ignore
+        } else if (event.features[0].properties.Site_Title !== undefined) {
+            popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+        }
+        // else {
+        //     // console.log(supercluster)
+        //     const features = map.queryRenderedFeatures(event.point, {
+        //     layers: [lyrId]
+        //     });
+        //     var clusterId = event.features[0].properties.cluster_id
+        //     point_count = event.features[0].properties.point_count
+        //     console.log(clusterId,point_count)
+        //     const clusterSource = map.getSource(lyrId+'-src')
+        //     console.log(clusterSource)
+        //     clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
+        //         console.log('getClusterLeaves', err, aFeatures);
+        //     })
 
-                        //     // let feats=event.features
-                        //     // console.log(feats)
-                        //     // lbl = feats.map((x)=>x.properties.Site_Title)
-                        //     // console.log(lbl)
-                        //     // popup
-                        //     // .setLngLat(event.lngLat)
-                        //     // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-                        //     // .addTo(map);
-                        //     // Change the cursor style as a UI indicator.
-                        //     map.getCanvas().style.cursor = 'pointer';
-                        // }
-                    })
+        //     // let feats=event.features
+        //     // console.log(feats)
+        //     // lbl = feats.map((x)=>x.properties.Site_Title)
+        //     // console.log(lbl)
+        //     // popup
+        //     // .setLngLat(event.lngLat)
+        //     // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+        //     // .addTo(map);
+        //     // Change the cursor style as a UI indicator.
+        //     map.getCanvas().style.cursor = 'pointer';
+        // }
+    })
 
-            // function sourceCallback(map) {
-            //     console.log('callin back')
-            //     // assuming 'map' is defined globally, or you can use 'this'
-            //     if (map.getSource(lyrId+'-src') && map.isSourceLoaded(lyrId+'-src')) {
-            //         console.log('source loaded!');
+    // function sourceCallback(map) {
+    //     console.log('callin back')
+    //     // assuming 'map' is defined globally, or you can use 'this'
+    //     if (map.getSource(lyrId+'-src') && map.isSourceLoaded(lyrId+'-src')) {
+    //         console.log('source loaded!');
                     
-            //         map.on('mouseleave', lyrId, () => {
-            //             map.getCanvas().style.cursor = '';
-            //             popup.remove();
-            //             });
+    //         map.on('mouseleave', lyrId, () => {
+    //             map.getCanvas().style.cursor = '';
+    //             popup.remove();
+    //             });
 
-            //         map.on('mouseenter', lyrId, (event) => {
-            //             if (event.features[0].properties.Site_Title!=undefined) {
-            //                 popup
-            //                 .setLngLat(event.lngLat)
-            //                 .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-            //                 .addTo(map);
-            //                 // Change the cursor style as a UI indicator.
-            //                 map.getCanvas().style.cursor = 'pointer';
-            //             }
-            //             else {
-            //                 // console.log(supercluster)
-            //                 const features = map.queryRenderedFeatures(event.point, {
-            //                 layers: [lyrId]
-            //                 });
-            //                 var clusterId = event.features[0].properties.cluster_id
-            //                 point_count = event.features[0].properties.point_count
-            //                 console.log(clusterId,point_count)
-            //                 const clusterSource = map.getSource(lyrId+'-src')
-            //                 console.log(clusterSource)
-            //                 clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-            //                     console.log('getClusterLeaves', err, aFeatures);
-            //                 })
+    //         map.on('mouseenter', lyrId, (event) => {
+    //             if (event.features[0].properties.Site_Title!=undefined) {
+    //                 popup
+    //                 .setLngLat(event.lngLat)
+    //                 .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+    //                 .addTo(map);
+    //                 // Change the cursor style as a UI indicator.
+    //                 map.getCanvas().style.cursor = 'pointer';
+    //             }
+    //             else {
+    //                 // console.log(supercluster)
+    //                 const features = map.queryRenderedFeatures(event.point, {
+    //                 layers: [lyrId]
+    //                 });
+    //                 var clusterId = event.features[0].properties.cluster_id
+    //                 point_count = event.features[0].properties.point_count
+    //                 console.log(clusterId,point_count)
+    //                 const clusterSource = map.getSource(lyrId+'-src')
+    //                 console.log(clusterSource)
+    //                 clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
+    //                     console.log('getClusterLeaves', err, aFeatures);
+    //                 })
 
-            //                 // let feats=event.features
-            //                 // console.log(feats)
-            //                 // lbl = feats.map((x)=>x.properties.Site_Title)
-            //                 // console.log(lbl)
-            //                 // popup
-            //                 // .setLngLat(event.lngLat)
-            //                 // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
-            //                 // .addTo(map);
-            //                 // Change the cursor style as a UI indicator.
-            //                 map.getCanvas().style.cursor = 'pointer';
-            //             }
-            //         })
-            //     }
-            // }
+    //                 // let feats=event.features
+    //                 // console.log(feats)
+    //                 // lbl = feats.map((x)=>x.properties.Site_Title)
+    //                 // console.log(lbl)
+    //                 // popup
+    //                 // .setLngLat(event.lngLat)
+    //                 // .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+    //                 // .addTo(map);
+    //                 // Change the cursor style as a UI indicator.
+    //                 map.getCanvas().style.cursor = 'pointer';
+    //             }
+    //         })
+    //     }
+    // }
 
-            // map.on('sourcedata', (map)=>{sourceCallback(map)})
-        // map.onSourceAdded()
+    // map.on('sourcedata', (map)=>{sourceCallback(map)})
+    // map.onSourceAdded()
             
     // // })
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
     
     
     const lyrz = [
-        {id:'Natural Gas Pipelines',
-        subdir:'TWDB_Critical_Infrastructure',
-        typ:'line',
-        color:'orange',
-        grup:"TWDB Critical Infrastructure"},
+        {
+            id: 'Natural Gas Pipelines',
+            subdir: 'TWDB_Critical_Infrastructure',
+            typ: 'line',
+            color: 'orange',
+            grup: "TWDB Critical Infrastructure"
+        },
 
-        {id:'Transmission Lines',
-        subdir:'TWDB_Critical_Infrastructure',
-        typ:'line',
-        color:'rgb(35, 130, 255)',
-        grup:"TWDB Critical Infrastructure"},
+        {
+            id: 'Transmission Lines',
+            subdir: 'TWDB_Critical_Infrastructure',
+            typ: 'line',
+            color: 'rgb(35, 130, 255)',
+            grup: "TWDB Critical Infrastructure"
+        },
      
-        {id:'Counties',
-        typ:'line',
-        color:'rgb(0, 255, 247)',
-        grup:"Boundaries",
-        lbl:'{CNTY_NM} County'}
+        {
+            id: 'Counties',
+            typ: 'line',
+            color: 'rgb(0, 255, 247)',
+            grup: "Boundaries",
+            lbl: '{CNTY_NM} County'
+        }
     ]
     
     lyrz.forEach(lyr => {
-        if ( lyr.hasOwnProperty('subdir') ) {
-            lyr.subdir = lyr.subdir+'/' }
-            else { lyr.subdir=''      }
+        if (lyr.hasOwnProperty('subdir')) {
+            lyr.subdir = lyr.subdir + '/'
+        }
+        else { lyr.subdir = '' }
         // if (!lyr.hasOwnProperty('lblOn') ) { lyr.lblOn='mouseenter' }
         
         map.addSource(lyr.id, {
             'type': 'geojson',
-            'data': dir+lyr.subdir+encodeURIComponent(lyr.id)+'.geojson',
+            'data': dir + lyr.subdir + encodeURIComponent(lyr.id) + '.geojson',
         })
         map.addLayer(
             {
@@ -875,71 +881,72 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'type': 'line',
                 'source': lyr.id,
                 paint: {
-                    'line-color':lyr.color,
-                        "line-width": 1.3
-                        // "line-opacity": .8
+                    'line-color': lyr.color,
+                    "line-width": 1.3
+                    // "line-opacity": .8
                 },
-                'layout': { 'visibility':'none'} //on load
+                'layout': { 'visibility': 'none' } //on load
             }
             // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-            )
+        )
 
         if (!lyr.hasOwnProperty('lbl')) {
             legendlyrs.push(
                 {
-                id: lyr.id,
-                hidden: false,
-                group: lyr.grup,
-                directory: "Legend"
+                    id: lyr.id,
+                    hidden: false,
+                    group: lyr.grup,
+                    directory: "Legend"
                 }
             )
         } else {
             legendlyrs.push(
-                    {
+                {
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
-                    children:[lyr.id+'-lbl'],
+                    children: [lyr.id + '-lbl'],
                     directory: "Legend"
-                    }
-                )
+                }
+            )
         
             //lbl
             map.addLayer(
-                    {
-                        'id': lyr.id+'-lbl',
-                        'type': 'symbol',
-                        'source': lyr.id,
-                        // paint: {
-                        //         "fill-opacity": 0
-                        // },
-                        paint: {
-                        "text-color":   lyr.color,
-                        'text-halo-width':2,
-                        'text-halo-blur':1,
-                        'text-halo-color':'black',
-                        },
-                        'layout': { 
-                            'text-field':lyr.lbl,
-                            'text-font': [
+                {
+                    'id': lyr.id + '-lbl',
+                    'type': 'symbol',
+                    'source': lyr.id,
+                    // paint: {
+                    //         "fill-opacity": 0
+                    // },
+                    paint: {
+                        "text-color": lyr.color,
+                        'text-halo-width': 2,
+                        'text-halo-blur': 1,
+                        'text-halo-color': 'black',
+                    },
+                    'layout': { 
+                        'text-field': lyr.lbl,
+                        'text-font': [
                             'Open Sans Semibold',
                             'Arial Unicode MS Bold'
-                            ],
-                            'text-offset': [0, 1.25],
-                            'text-anchor': 'top',
-                            'visibility':'none'} //on load
-                    }
-                    // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-                    )
-                legendlyrs.push(
-                    {
-                    id: lyr.id+'-lbl',
+                        ],
+                        'text-offset': [0, 1.25],
+                        'text-anchor': 'top',
+                        'visibility': 'none'
+                    } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            )
+            legendlyrs.push(
+                {
+                    id: lyr.id + '-lbl',
                     hidden: true,
                     group: lyr.grup,
-                    parent:lyr.id,
+                    parent: lyr.id,
                     directory: "Legend"
-                    }
-                )
+                }
+            )
         }
         
         // if (lyr.lblOn==='click') { //why can't pass lyr.lblOn straight into map.on()??
@@ -955,7 +962,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         //         .addTo(map);
         //     }); 
         // } else {
-            // console.log('enter')
+        // console.log('enter')
         //     map.on('mouseenter', lyrId, (event) => {
         //         // Change the cursor style as a UI indicator.
         //         map.getCanvas().style.cursor = 'pointer';
@@ -978,47 +985,27 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
     map.addSource(lyrId, {
         'type': 'raster',
-        'tiles': [ dir+encodeURIComponent(lyrId)+'/{z}/{x}/{y}.png' ],
+        'tiles': [dir + encodeURIComponent(lyrId) + '/{z}/{x}/{y}.png'],
         // 'tiles': dir+encodeURIComponent(lyrId)+'.mbtiles'
-        minzoom:7,
-        maxzoom:13
+        minzoom: 7,
+        maxzoom: 13
     })
     map.addLayer(
         {
             'id': lyrId,
             'type': 'raster',
             'source': lyrId,
-            'layout': { 'visibility':'none'} //on load
+            'layout': { 'visibility': 'none' } //on load
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+    )
     legendlyrs.push(
         {
-        id: lyrId,
-        hidden: false,
-        group: "FEMA BLE",
-        // children:[lyrId+'-fill'],
-        directory: "Legend"
-        }
-        )
-
-    
-    lyrId = 'Counties Within Neches River Watershed'
-    map.addSource(lyrId, {
-        type: "geojson",
-        data: janLayerDir2 + "Country+boundaries/Neches_Counties_fixed.geojson"
-    })
-    map.addLayer(
-        {
             id: lyrId,
-            source: lyrId,
-            type: 'fill',
-            layout: {},
-            paint: {
-                'fill-color': '#ffffff',
-                'fill-outline-color': '#000000',
-                'fill-opacity': 1,
-            }
+            hidden: false,
+            group: "FEMA BLE",
+            // children:[lyrId+'-fill'],
+            directory: "Legend"
         }
     )
 
@@ -1031,47 +1018,50 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     // Mapbox doesn't support line-width for polygons, so I added these line versions to the S3 bucket:
     // Neches counties, Jefferson county drainage districts, FIF Cat 1 project areas, and Regional flood planning groups 
-    lyrId = 'Counties Within Neches River Watershed (Line)'
-    map.addSource(lyrId, {
-        type: "geojson",
-        data: janLayerDir2 + "Country+boundaries/Neches_Counties_lines_fixed.geojson"
-    })
-    map.addLayer(
-        {
-            id: lyrId,
-            source: lyrId,
-            type: 'line',
-            layout: {},
-            paint: {
-                'line-color': 'rgb(0, 255, 247)',
-                'line-opacity': 1,
-                "line-width": 1.3
-            }
-        }
-    )
+    // lyrId = 'Counties Within Neches River Watershed'
+    // map.addSource(lyrId, {
+    //     type: "geojson",
+    //     data: janLayerDir2 + "Country+boundaries/Neches_Counties_lines_fixed.geojson"
+    // })
+    // map.addLayer(
+    //     {
+    //         id: lyrId,
+    //         source: lyrId,
+    //         type: 'line',
+    //         layout: {},
+    //         paint: {
+    //             'line-color': 'rgb(0, 255, 247)',
+    //             'line-opacity': 1,
+    //             "line-width": 1.3
+    //         }
+    //     }
+    // )
 
-    legendlyrs.push({
-        id: lyrId,
-        hidden: false,
-        group: "Neches Watershed",
-        directory: "Legend"
-    })
+    // legendlyrs.push({
+    //     id: lyrId,
+    //     hidden: false,
+    //     group: "Neches Watershed",
+    //     directory: "Legend"
+    // })
 
     // National Land Cover Database
-    lyrId = 'Land Cover 2019'
+    lyrId = 'Land Cover'
+
+    // TODO: Add bounds? 
     map.addSource(lyrId, {
         'type': 'raster',
         'tiles': [
             'https://www.mrlc.gov/geoserver/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image%2Fpng&TRANSPARENT=true&LAYERS=mrlc_display%3ANLCD_2019_Land_Cover_L48&TILED=true&SRS=EPSG%3A3857&jsonLayerId=allconusNlcd2019LandCover&STYLES=&WIDTH=256&HEIGHT=256&CRS=EPSG%3A3857&bbox={bbox-epsg-3857}'
         ],
-        'tileSize': 256
+        'tileSize': 256, 
     });
     map.addLayer(
         {
             'id': lyrId,
             'type': 'raster',
             'source': lyrId,
-            'paint': {}
+            'paint': {}, 
+            'layout': { 'visibility': 'none' } //on load
         },
         'building' // Place layer under labels, roads and buildings.
     );
@@ -1079,18 +1069,17 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     legendlyrs.push({
         id: lyrId,
         hidden: false,
-        group: "NLCD",
+        group: "Built and Natural Environment Features",
         directory: "Legend"
     })
-
 
     //txdot overtopping
     lyrId = 'TxDOT Overtopping'
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
     map.addSource(lyrId, {
         'type': 'geojson',
-        'data': dir+lyrId+'.geojson',
-        'generateId':true
+        'data': dir + lyrId + '.geojson',
+        'generateId': true
     })
     map.addLayer(
         {
@@ -1098,45 +1087,45 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             'type': 'line',
             'source': lyrId,
             paint: {
-                'line-color':[
+                'line-color': [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     'rgb(0, 172, 163)',
                     'black'
-                    ],
-                    "line-width": [
+                ],
+                "line-width": [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     12,
                     4
-                    ],
-                    "line-opacity": [
+                ],
+                "line-opacity": [
                     'case',
                     ['boolean', ['feature-state', 'hover'], false],
                     .5,
                     1
-                    ],
+                ],
             },
-            'layout': { 'visibility':'none'} //on load
+            'layout': { 'visibility': 'none' } //on load
         }
         // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+    )
     legendlyrs.push(
         {
-        id: lyrId,
-        hidden: false,
-        group: "Roadway Overtopping",
-        // children:[lyrId+'-fill'],
-        directory: "Legend"
+            id: lyrId,
+            hidden: false,
+            group: "Roadway Overtopping",
+            // children:[lyrId+'-fill'],
+            directory: "Legend"
         }
-        )
+    )
     
     // map.on('mouseenter', lyrId, (e) => {
 
-        // })
+    // })
 
-        let txdotHover: any = null
-        map.on('mousemove', lyrId, (e) => {
+    let txdotHover: any = null
+    map.on('mousemove', lyrId, (e) => {
         
         if (e.features?.length ?? 0 > 0) {
 
@@ -1163,27 +1152,27 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 { hover: true }
             );
         }
-        });
-        // When the mouse leaves the state-fill layer, update the feature state of the
-        // previously hovered feature.
-        map.on('mouseleave', lyrId, () => {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-            if (txdotHover !== null) {
+    });
+    // When the mouse leaves the state-fill layer, update the feature state of the
+    // previously hovered feature.
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+        if (txdotHover !== null) {
             map.setFeatureState(
-            { source: lyrId, id: txdotHover },
-            { hover: false }
+                { source: lyrId, id: txdotHover },
+                { hover: false }
             );
-            }
-            txdotHover = null;
-        });
+        }
+        txdotHover = null;
+    });
 
-    const huclyrs = ['HUC8','HUC10','HUC12'];
-    huclyrs.forEach(lyrId=>{
+    const huclyrs = ['HUC8', 'HUC10', 'HUC12'];
+    huclyrs.forEach(lyrId => {
 
-            map.addSource(lyrId, {
+        map.addSource(lyrId, {
             'type': 'geojson',
-            'data': huclyrdir+lyrId+'.geojson'
+            'data': huclyrdir + lyrId + '.geojson'
         })
 
         map.addLayer(
@@ -1193,58 +1182,58 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'source': lyrId,
                 'paint': {
                     'line-color': '#ffffff',
-                    'line-width': 12*12*12*12*.5/ Math.pow( parseInt(lyrId.replace('HUC','')) ,4),
+                    'line-width': 12 * 12 * 12 * 12 * .5 / Math.pow(parseInt(lyrId.replace('HUC', '')), 4),
                     'line-opacity': .8
                 },
-                'layout': { 'visibility':'none'} //on load
+                'layout': { 'visibility': 'none' } //on load
             }
             // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-            )
-            map.addLayer(
+        )
+        map.addLayer(
             {
-                'id': lyrId+'-fill',
+                'id': lyrId + '-fill',
                 'type': 'fill',
                 'source': lyrId,
                 'paint': {
                     'fill-opacity': 0
                 },
-                'layout': { 'visibility':'none'} //on load
+                'layout': { 'visibility': 'none' } //on load
             }
             // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-            )
+        )
             
-            legendlyrs.push(
-                {
+        legendlyrs.push(
+            {
                 id: lyrId,
                 hidden: false,
                 group: "Boundaries",
-                children:[lyrId+'-fill'],
+                children: [lyrId + '-fill'],
                 directory: "Legend"
-                },
-                {
-                id: lyrId+'-fill',
+            },
+            {
+                id: lyrId + '-fill',
                 parent: lyrId,
                 hidden: true,
                 group: "Boundaries",
                 directory: "Legend"
-                }
-                )
-        })
+            }
+        )
+    })
 
     const fldzonelyrs = ['500YR Preliminary',
-                '500YR Effective',
-                '100YR Preliminary',
-                '100YR Effective']
-    let colrs = zip(fldzonelyrs,['#c36c08','#c7af0e','#0000b0','#5544fd'])
+        '500YR Effective',
+        '100YR Preliminary',
+        '100YR Effective']
+    let colrs = zip(fldzonelyrs, ['#c36c08', '#c7af0e', '#0000b0', '#5544fd'])
     colrs = Object.fromEntries(colrs)
 
-    fldzonelyrs.forEach(lyrId=>{
+    fldzonelyrs.forEach(lyrId => {
         map.addSource(lyrId, {
-        'type': 'geojson',
-        'data': lyrdir+'Floodplain/'+lyrId+'.geojson'
-    });
+            'type': 'geojson',
+            'data': lyrdir + 'Floodplain/' + lyrId + '.geojson'
+        });
 
-    map.addLayer({
+        map.addLayer({
             'id': lyrId,
             'type': 'fill',
             'source': lyrId,
@@ -1252,7 +1241,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'fill-color': colrs[lyrId],
                 'fill-opacity': .35
             },
-            'layout': { 'visibility':'none'} //on load
+            'layout': { 'visibility': 'none' } //on load
         });
         
         legendlyrs.push({
@@ -1317,21 +1306,21 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     ];
     
     heatmaplyrs.forEach(heatlyr => {
-        addHeatmap(map,heatlyr);
+        addHeatmap(map, heatlyr);
         legendlyrs.push(
             {
-            id: heatlyr.id+"-point",
-            parent: heatlyr.id+"",
-            hidden: true,
-            group: heatlyr.grup,
-            directory: "Legend"
+                id: heatlyr.id + "-point",
+                parent: heatlyr.id + "",
+                hidden: true,
+                group: heatlyr.grup,
+                directory: "Legend"
             },
             {
-            id: heatlyr.id+"",
-            hidden: false,
-            children: [heatlyr.id+"-point"],
-            group: heatlyr.grup,
-            directory: "Legend",
+                id: heatlyr.id + "",
+                hidden: false,
+                children: [heatlyr.id + "-point"],
+                group: heatlyr.grup,
+                directory: "Legend",
             }
         );
     });
@@ -1343,13 +1332,13 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     // legendlyrs[legendlyrs.map((x)=>x.id).indexOf(replossId+'-point')].group = 'TWDB Critical Infrastructure'
 
     //order layers
-    fldzonelyrs.forEach(lyrId=>{
-        map.moveLayer('FEMA '+lyrId)
-        map.moveLayer('FEMA '+lyrId+'-point')
+    fldzonelyrs.forEach(lyrId => {
+        map.moveLayer('FEMA ' + lyrId)
+        map.moveLayer('FEMA ' + lyrId + '-point')
     })
     map.moveLayer(replossId)
-    map.moveLayer(replossId+'-point')
-    huclyrs.forEach(lyrId=>{
+    map.moveLayer(replossId + '-point')
+    huclyrs.forEach(lyrId => {
         map.moveLayer(lyrId)
     })
     
@@ -1362,11 +1351,11 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         map.setLayoutProperty('zipcodes', 'visibility', 'visible');
         // new mapboxgl.Popup()
         popup
-        // @ts-ignore
-        .setLngLat(event.features[0].geometry.coordinates)
-        // @ts-ignore
-        .setHTML(`<strong>Repetitive Loss Properties:</strong> ${event.features[0].properties.reptloss}<br>in zip code ${event.features[0].properties.id}`)
-        .addTo(map);
+            // @ts-ignore
+            .setLngLat(event.features[0].geometry.coordinates)
+            // @ts-ignore
+            .setHTML(`<strong>Repetitive Loss Properties:</strong> ${event.features[0].properties.reptloss}<br>in zip code ${event.features[0].properties.id}`)
+            .addTo(map);
         // // Copy coordinates array.
         // const coordinates = e.features[0].geometry.coordinates.slice();
         // const description = e.features[0].properties.description;
@@ -1381,10 +1370,10 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         // // Populate the popup and set its coordinates
         // // based on the feature found.
         // popup.setLngLat(coordinates).setHTML(description).addTo(map);
-        });
+    });
     
     map.on('mousemove', 'zipcodes', (e) => {
-        if ((e.features?.length ?? 0) > 0 && playing==false) {
+        if ((e.features?.length ?? 0) > 0 && playing == false) {
             if (hoveredId !== null) {
                 map.setFeatureState(
                     { source: 'zipcodes', id: hoveredId },
@@ -1395,8 +1384,8 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             hoveredId = e.features![0].id ?? null;
             // console.log(typeof hoveredId)
             map.setFeatureState(
-            { source: 'zipcodes', id: hoveredId ?? undefined },
-            { hover: true }
+                { source: 'zipcodes', id: hoveredId ?? undefined },
+                { hover: true }
             );
         }
     });
@@ -1417,38 +1406,38 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         popup.remove();
     });
 
-    huclyrs.forEach(huc=>{
-        map.on('click', huc+'-fill', (event) => {
-        popup
-            .setLngLat(event.lngLat)
-            .setHTML(`<strong>${huc}</strong> ${event.features![0].properties!.name}<br>
+    huclyrs.forEach(huc => {
+        map.on('click', huc + '-fill', (event) => {
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(`<strong>${huc}</strong> ${event.features![0].properties!.name}<br>
                     ${event.features![0].properties!.huc8}`)
-            .addTo(map);
+                .addTo(map);
         });     
 
-        map.on('mouseleave', huc+'-fill', () => {
+        map.on('mouseleave', huc + '-fill', () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
-            });
+        });
 
-        map.on('mouseenter', huc+'-fill', (_) => {
+        map.on('mouseenter', huc + '-fill', (_) => {
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
         })
     })
 
-    fldzonelyrs.forEach(lyrId=>{
+    fldzonelyrs.forEach(lyrId => {
         map.on('click', lyrId, (event) => {
-        popup
-            .setLngLat(event.lngLat)
-            .setHTML(`<strong>FEMA ${lyrId} Floodplain</strong>`)
-            .addTo(map);
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(`<strong>FEMA ${lyrId} Floodplain</strong>`)
+                .addTo(map);
         });     
         
         map.on('mouseleave', lyrId, () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
-            });
+        });
             
         map.on('mouseenter', lyrId, (_) => {
             // Change the cursor style as a UI indicator.
@@ -1457,20 +1446,20 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     })
 }
 
-map.on('load', async ()=> {
+map.on('load', async () => {
     await loadMapboxImage(map, 'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png', 'custom-marker');
     await loadLayers()
     
     legendConfig = {
         collapsed: true,
-        layers:legendlyrs
+        layers: legendlyrs
     }
 
     map.addControl(new LayerControlGrouped(legendConfig), "top-left")
     map.addControl(
         new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl
         })
     )
     
@@ -1480,45 +1469,45 @@ map.on('load', async ()=> {
     
     
     popup = new mapboxgl.Popup({
-    // className: "popup",
-    closeButton: false,
-    closeOnClick: false
+        // className: "popup",
+        closeButton: false,
+        closeOnClick: false
     });
 
     playing = false
     let urlParams = new URLSearchParams(window.location.search)
     // console.log(urlParams.keys())
     
-    if ( urlParams.toString().includes(replossId.replaceAll(' ','+')) ) {
+    if (urlParams.toString().includes(replossId.replaceAll(' ', '+'))) {
         tutorial(map) //only if on base url
     }
 })
 
 // addMap()
-function pointerData(x,y) {
+function pointerData(x, y) {
     // return [[x,y],[x+10,y+10],[x+20,y]]
     return {
-                'type':'Point',
-                'coordinates':[x,y] 
-            }
+        'type': 'Point',
+        'coordinates': [x, y] 
+    }
     //TODO: mouse outline:
-    let coords =  [ //why extra [] no idea
-        [[ x        ,  y        ],
-       [ x+0.0279833 , y+ 0.00227988],
-       [ x+0.02224666, y-0.00885596],
-       [ x+0.03879149, y-0.0172458 ],
-       [ x+0.03496963, y-0.02466469],
-       [ x+0.0184248 , y-0.01627485],
-       [ x+0.0184248 , y-0.01627485],
-       [ x+0.01268816, y-0.02741069]] 
+    let coords = [ //why extra [] no idea
+        [[x, y],
+        [x + 0.0279833, y + 0.00227988],
+        [x + 0.02224666, y - 0.00885596],
+        [x + 0.03879149, y - 0.0172458],
+        [x + 0.03496963, y - 0.02466469],
+        [x + 0.0184248, y - 0.01627485],
+        [x + 0.0184248, y - 0.01627485],
+        [x + 0.01268816, y - 0.02741069]] 
     ]
     return {
-                'type':'Feature',
-                'geometry':{
-                    'type':'Polygon',
-                    'coordinates':coords
-                }
-            }
+        'type': 'Feature',
+        'geometry': {
+            'type': 'Polygon',
+            'coordinates': coords
+        }
+    }
 }
 
 const restyle = async (layerId) => {
@@ -1530,15 +1519,15 @@ const restyle = async (layerId) => {
     //refresh lyrs
     let params: any = await new URLSearchParams(window.location.search)
 
-    let myparams = await zip(params.keys(),Array.from( params.values() ))
+    let myparams = await zip(params.keys(), Array.from(params.values()))
 
-    Array.from(params.keys()).forEach(param=>{
+    Array.from(params.keys()).forEach(param => {
         params.delete(param)
     })
 
     // console.log(myparams)
-    myparams.forEach(param=>{
-        params.set(param[0],param[1])
+    myparams.forEach(param => {
+        params.set(param[0], param[1])
     })
 
     let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
@@ -1548,7 +1537,7 @@ const restyle = async (layerId) => {
 
     let _layers = [...params.keys()];
 
-    _layers.map(function(l) {
+    _layers.map(function (l) {
         // if (keys.indexOf(l) > -1) {
         // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
         // if (!visibility) {
@@ -1562,20 +1551,20 @@ const restyle = async (layerId) => {
 for (const input of inputs) {
     input.onclick = async (layer) => {
 
-        map.once("styledata", async ()=> {
+        map.once("styledata", async () => {
             await loadLayers()
 
             //refresh lyrs
             let params: any = await new URLSearchParams(window.location.search)
-            let myparams = await zip(params.keys(),Array.from( params.values() ))
+            let myparams = await zip(params.keys(), Array.from(params.values()))
 
-            Array.from(params.keys()).forEach(param=>{
+            Array.from(params.keys()).forEach(param => {
                 params.delete(param)
             })
 
             // console.log(myparams)
-            myparams.forEach(param=>{
-                params.set(param[0],param[1])
+            myparams.forEach(param => {
+                params.set(param[0], param[1])
             })
             
             let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
@@ -1585,7 +1574,7 @@ for (const input of inputs) {
 
             let _layers = [...params.keys()];
 
-            _layers.map(function(l) {
+            _layers.map(function (l) {
                 // if (keys.indexOf(l) > -1) {
                 // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
                 // if (!visibility) {
@@ -1596,18 +1585,18 @@ for (const input of inputs) {
 
             // map.base_layers = darkv10.layers
             // console.log(map.base_layers)
-                // map.hide_base_layers = function() {
-                //     for (var v in map.base_layers) {
-                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
-                //     }
-                // }
-                // map.show_base_layers = function() {
-                //     for (var v in map.base_layers) {
-                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
-                //     }
-                // }
-                // map.hide_base_layers()
-                // map.show_base_layers()
+            // map.hide_base_layers = function() {
+            //     for (var v in map.base_layers) {
+            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
+            //     }
+            // }
+            // map.show_base_layers = function() {
+            //     for (var v in map.base_layers) {
+            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
+            //     }
+            // }
+            // map.hide_base_layers()
+            // map.show_base_layers()
         });
 
         const layerId = layer.target.id;
