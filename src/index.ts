@@ -803,7 +803,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: 'orange',
             grup: "TWDB Critical Infrastructure"
         },
-
         {
             id: 'Transmission Lines',
             subdir: 'TWDB_Critical_Infrastructure',
@@ -811,26 +810,47 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: 'rgb(35, 130, 255)',
             grup: "TWDB Critical Infrastructure"
         },
-     
         {
             id: 'Counties',
             typ: 'line',
             color: 'rgb(0, 255, 247)',
             grup: "Boundaries",
             lbl: '{CNTY_NM} County'
-        }
+        },
+        {
+            id: 'Regional Flood Planning Groups',
+            subdir: `layers_jan_2023/${encodeURIComponent('Regional Flood Planning Groups')}`,
+            typ: 'line', 
+            color: 'crimson', 
+            grup: "Boundaries",
+            lbl: '{RFPG}'
+        }, 
+        {
+            id: 'Drainage Districts',
+            subdir: `layers_jan_2023/${encodeURIComponent('Drainage Districts')}`,
+            typ: 'line', 
+            color: 'darkviolet', 
+            grup: "Boundaries",
+            lbl: '{Name}'
+        }, 
+        {
+            id: 'RPS Project Limits',
+            subdir: `layers_jan_2023/${encodeURIComponent('RPS Project Limits')}`,
+            typ: 'line', 
+            color: '#71004B', 
+            grup: "Boundaries",
+        }, 
     ]
     
     lyrz.forEach(lyr => {
-        if (lyr.hasOwnProperty('subdir')) {
+        if (lyr.subdir) {
             lyr.subdir = lyr.subdir + '/'
         }
         else { lyr.subdir = '' }
-        // if (!lyr.hasOwnProperty('lblOn') ) { lyr.lblOn='mouseenter' }
         
         map.addSource(lyr.id, {
-            'type': 'geojson',
-            'data': dir + lyr.subdir + encodeURIComponent(lyr.id) + '.geojson',
+            type: 'geojson',
+            data: dir + lyr.subdir + encodeURIComponent(lyr.id) + '.geojson',
         })
         map.addLayer(
             {
