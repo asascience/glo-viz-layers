@@ -76,7 +76,7 @@ export function getLayerVisibility(mapLayers, ids, layer) {
     if (index < 0) {
         return false
     } else {
-        return mapLayers[index].layout.visibility === "visible" ? true : false;
+        return mapLayers[index]?.layout?.visibility === "visible" ? true : false;
     }
 }
 
@@ -116,7 +116,7 @@ export function getStyle(layers, layer) {
     let layerConfig = layers.filter(function (l) {
         return l.id === layer.id
     })
-    let style = (!layerConfig[0].paint) ? false : layerConfig[0].paint
+    let style = (!layerConfig[0]?.paint) ? false : layerConfig[0].paint
 
     return style
 }
