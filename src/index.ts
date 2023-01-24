@@ -839,7 +839,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             typ: 'line', 
             color: '#71004B', 
             grup: "Boundaries",
-        }, 
+        },
     ]
     
     lyrz.forEach(lyr => {
@@ -852,20 +852,36 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             type: 'geojson',
             data: dir + lyr.subdir + encodeURIComponent(lyr.id) + '.geojson',
         })
-        map.addLayer(
-            {
-                'id': lyr.id,
-                'type': 'line',
-                'source': lyr.id,
-                paint: {
-                    'line-color': lyr.color,
-                    "line-width": 1.3
-                    // "line-opacity": .8
-                },
-                'layout': { 'visibility': 'none' } //on load
-            }
-            // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+        if (lyr.typ === 'line') {
+            map.addLayer(
+                {
+                    'id': lyr.id,
+                    'type': 'line',
+                    'source': lyr.id,
+                    paint: {
+                        'line-color': lyr.color,
+                        "line-width": 1.3
+                        // "line-opacity": .8
+                    },
+                    'layout': { 'visibility': 'none' } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            );
+        } else if (lyr.typ === 'circle') {
+            map.addLayer(
+                {
+                    id: lyr.id,
+                    type: 'circle',
+                    source: lyr.id,
+                    paint: {
+                        'circle-color': lyr.color,
+                        "circle-radius": 6,
+                    },
+                    layout: { 'visibility': 'none' } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            );
+        }
 
         if (!lyr.hasOwnProperty('lbl')) {
             legendlyrs.push(
@@ -1228,22 +1244,46 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             lblSuff: ' Floodplain'
         },
         {
-            'id': 'Current Schools',
-            'data': dir + 'TWDB_Critical_Infrastructure/Current Schools.geojson',
-            colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+            id: 'Current Schools',
+            data: dir + 'TWDB_Critical_Infrastructure/Current Schools.geojson',
+            colormap: CUBE_HELIX, 
+            grup: 'TWDB Critical Infrastructure'
         },
         {
-            'id': 'Fire Stations',
-            'data': dir + 'TWDB_Critical_Infrastructure/Fire Stations.geojson', colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+            id: 'Fire Stations',
+            data: dir + 'TWDB_Critical_Infrastructure/Fire Stations.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'TWDB Critical Infrastructure'
         },
         {
-            'id': 'Hospitals', 'data': dir + 'TWDB_Critical_Infrastructure/Hospitals.geojson'
-            , colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+            id: 'Hospitals', 
+            data: dir + 'TWDB_Critical_Infrastructure/Hospitals.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'TWDB Critical Infrastructure'
         },
         {
-            'id': 'National Shelter System Facilities',
-            'data': dir + 'TWDB_Critical_Infrastructure/National Shelter System Facilities.geojson'
-            , colormap: CUBE_HELIX, grup: 'TWDB Critical Infrastructure'
+            id: 'National Shelter System Facilities',
+            data: dir + 'TWDB_Critical_Infrastructure/National Shelter System Facilities.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'TWDB Critical Infrastructure'
+        },
+        {
+            id: 'Levees', 
+            data: janlayerdir + 'Levees/Levees.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'Built and Natural Environment Features',
+        },
+        {
+            id: 'Dams', 
+            data: janlayerdir + 'Dams/Dams.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'Built and Natural Environment Features',
+        },
+        {
+            id: 'Bridges', 
+            data: janlayerdir + 'Bridges/Bridges.geojson', 
+            colormap: CUBE_HELIX, 
+            grup: 'Built and Natural Environment Features',
         },
     ];
     
