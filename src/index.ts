@@ -1454,7 +1454,12 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             id: 'NOAA Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges_fixed.geojson`,
             color: '#489DD5',
-        }, 
+        },
+        {
+            id: 'NOAA GHCN Gauges',
+            url: `${janlayerdir}${encodeURIComponent('NOAA GHCN Gauges')}/${encodeURIComponent('NOAA GHCN Gauges')}.geojson`,
+            color: '#2A76D5'
+        }
     ]; 
 
     observations.forEach(o => {
@@ -1488,7 +1493,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
     
         map.on('mouseenter', o.id, (event) => {
-            console.log(event.features);
             // @ts-ignore
             if (event.features[0].properties.Location) {
                 popup
@@ -1513,6 +1517,15 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                     .setLngLat(event.lngLat)
                     // @ts-ignore
                     .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
+                    .addTo(map);
+                // Change the cursor style as a UI indicator.
+                map.getCanvas().style.cursor = 'pointer';
+                // @ts-ignore
+            } else if (event.features[0].properties.Field1) {
+                popup
+                    .setLngLat(event.lngLat)
+                    // @ts-ignore
+                    .setHTML(`<strong>${event.features[0].properties.Field1}</strong><br><span>${event.features[0].properties.Field6}${typeof event.features[0].properties.Field7 === 'string' ? ' ' + event.features[0].properties.Field7 : ''}, ${event.features[0].properties.Field5}</span>`)
                     .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
