@@ -840,6 +840,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: '#71004B', 
             grup: "Boundaries",
         },
+        {
+            id: 'Reservoirs',
+            subdir: `layers_jan_2023/${encodeURIComponent('Reservoirs')}`,
+            typ: 'fill',
+            color: 'royalblue',
+            grup: "Built and Natural Environment Features",
+            lbl: '{RES_NAME}',
+        }
     ]
     
     lyrz.forEach(lyr => {
@@ -852,6 +860,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             type: 'geojson',
             data: dir + lyr.subdir + encodeURIComponent(lyr.id) + '.geojson',
         })
+
         if (lyr.typ === 'line') {
             map.addLayer(
                 {
@@ -867,17 +876,17 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 }
                 // ,'FEMA Severe Repetitive Loss Properties' //add underneath
             );
-        } else if (lyr.typ === 'circle') {
+        } else if (lyr.typ === 'fill') {
             map.addLayer(
                 {
-                    id: lyr.id,
-                    type: 'circle',
-                    source: lyr.id,
+                    'id': lyr.id,
+                    'type': 'fill',
+                    'source': lyr.id,
                     paint: {
-                        'circle-color': lyr.color,
-                        "circle-radius": 6,
+                        'fill-color': lyr.color,
+                        "fill-opacity": .8
                     },
-                    layout: { 'visibility': 'none' } //on load
+                    'layout': { 'visibility': 'none' } //on load
                 }
                 // ,'FEMA Severe Repetitive Loss Properties' //add underneath
             );
