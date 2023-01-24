@@ -388,13 +388,13 @@ const tutorial = async (map) => {
         if (route.length === 0) { // call the anim and check if returns true;
             // animation ended so get the next animation function if there are any
             // console.log(zyp)
-            await map.setFeatureState(
+            map.setFeatureState(
                 { source: 'zipcodes', id: zyp },
                 { hover: true }
             )
 
-            const aray = await reptLossData.features
-            const reptloss = await aray[aray.map((x) => x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
+            const aray = reptLossData.features
+            const reptloss = aray[aray.map((x) => x.properties.id).indexOf(zyp)].properties.reptloss //TODO change this to zip if the prop changes back to zip HARDCODED
             // console.log(reptloss)
             popup
                 .setLngLat(lastcoord)
@@ -414,7 +414,7 @@ const tutorial = async (map) => {
             // console.log(testhover)
                 
             // console.log('close')
-            await map.setFeatureState(
+            map.setFeatureState(
                 { source: 'zipcodes', id: zyp },
                 { hover: false }
             )
