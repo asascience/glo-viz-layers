@@ -847,6 +847,13 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: 'royalblue',
             grup: "Built and Natural Environment Features",
             lbl: '{RES_NAME}',
+        }, 
+        {
+            id: 'Harvey Impact Area', 
+            subdir: `layers_jan_2023/${encodeURIComponent('Harvey Impact Area')}`,
+            typ: 'fill',
+            color: 'orangered', 
+            grup: 'Repetitive Loss',
         }
     ]
     
@@ -884,7 +891,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                     'source': lyr.id,
                     paint: {
                         'fill-color': lyr.color,
-                        "fill-opacity": .8
+                        "fill-opacity": .7
                     },
                     'layout': { 'visibility': 'none' } //on load
                 }
