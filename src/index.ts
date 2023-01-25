@@ -1019,7 +1019,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     // National Land Cover Database
-    lyrId = 'Land Cover'
+    lyrId = 'Land Use'
 
     // TODO: Add bounds? 
     map.addSource(lyrId, {
@@ -1048,7 +1048,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     })
 
     // Land Cover (Percent Impervious)
-    lyrId = 'Land Cover (% Impervious)'
+    lyrId = 'Land Cover'
 
     map.addSource(lyrId, {
         'type': 'raster',
@@ -1066,6 +1066,34 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         },
         //'building' // Place layer under labels, roads and buildings.
     );
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Built and Natural Environment Features",
+        directory: "Legend"
+    })
+
+    // Soils
+    lyrId = 'Soil Types'
+
+    map.addSource(lyrId, {
+        type: 'vector',
+        tiles: [janlayerdir + 'Soils/tiles_pbf/{z}/{x}/{y}.pbf'],
+        minzoom: 0,
+        maxzoom: 10,
+    });
+    map.addLayer({
+        id: lyrId,
+        type: 'fill',
+        source: lyrId,
+        'source-layer': 'Neches_Soil',
+        'layout': { 'visibility': 'none' }, //on load
+        'paint': {
+            'fill-color': '#ffcc66',
+            'fill-opacity': .35
+        },
+    })
 
     legendlyrs.push({
         id: lyrId,
