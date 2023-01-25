@@ -1037,7 +1037,34 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             'paint': {}, 
             'layout': { 'visibility': 'none' } //on load
         },
-        'building' // Place layer under labels, roads and buildings.
+        //'building' // Place layer under labels, roads and buildings.
+    );
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Built and Natural Environment Features",
+        directory: "Legend"
+    })
+
+    // Land Cover (Percent Impervious)
+    lyrId = 'Land Cover (% Impervious)'
+
+    map.addSource(lyrId, {
+        'type': 'raster',
+        "maxzoom": 10,
+        'tiles': [janlayerdir + 'Land_Use/tiles_png/{z}/{x}/{y}.png'],
+        'tileSize': 256, 
+    });
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'raster',
+            'source': lyrId,
+            'paint': {}, 
+            'layout': { 'visibility': 'none' } //on load
+        },
+        //'building' // Place layer under labels, roads and buildings.
     );
 
     legendlyrs.push({
