@@ -1110,6 +1110,32 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         directory: "Legend"
     })
 
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    map.on('mousemove', lyrId, (event) => {
+        let features = event.features as Array<any>;
+        let html = '';
+
+        features.forEach(f => {
+            if (f.properties.muaggatt_m) {
+                html += `<span><strong>${f.properties.muaggatt_m}</strong> - ${f.properties.muaggatt_1}<br>`;
+            }
+        });
+
+        if (html.length > 0) {
+            popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(html)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+        }
+    })
+
     //txdot overtopping
     lyrId = 'TxDOT Overtopping'
     // console.log(dir+encodeURIComponent(lyrId)+'.mbtiles' )
