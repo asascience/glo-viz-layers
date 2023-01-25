@@ -854,6 +854,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             typ: 'fill',
             color: 'orangered', 
             grup: 'Repetitive Loss',
+        },
+        {
+            id: 'GLO RBFS Project Team Study Area', 
+            subdir: `layers_jan_2023/${encodeURIComponent('GLO RBFS Project Team Study Area')}`,
+            typ: 'line',
+            color: 'red', 
+            grup: 'Boundaries',
+            lbl: '{TEAM}',
         }
     ]
     
