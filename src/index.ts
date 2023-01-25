@@ -741,7 +741,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     map.addSource(lyrId + '-src', {
         type: 'geojson',
-        data: `${janlayerdir}${encodeURIComponent('FIF CAT 1 Combined Shapefile')}/${encodeURIComponent('FIF CAT 1 Project Areas_fixed.geojson')}`,
+        data: `${janlayerdir}${encodeURIComponent('FIF CAT 1 Combined Shapefile')}/${encodeURIComponent('FIF CAT 1 Project Areas.geojson')}`,
         // clusterMaxZoom: 10, // Max zoom to cluster points on
         // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
     });
@@ -1061,7 +1061,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     map.addSource(lyrId, {
         'type': 'raster',
         "maxzoom": 10,
-        'tiles': [janlayerdir + 'Land_Use/tiles_png/{z}/{x}/{y}.png'],
+        'tiles': [janlayerdir + 'Land_Cover/tiles_png/{z}/{x}/{y}.png'],
         'tileSize': 256, 
     });
     map.addLayer(
@@ -1515,7 +1515,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         },
         {
             id: 'NOAA Stream Gauges', 
-            url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges_fixed.geojson`,
+            url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges.geojson`,
             color: '#489DD5',
         },
         {
