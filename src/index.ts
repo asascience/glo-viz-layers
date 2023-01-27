@@ -741,7 +741,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     map.addSource(lyrId + '-src', {
         type: 'geojson',
-        data: `${janlayerdir}${encodeURIComponent('FIF CAT 1 Combined Shapefile')}/${encodeURIComponent('FIF CAT 1 Project Areas_fixed.geojson')}`,
+        data: `${janlayerdir}${encodeURIComponent('FIF CAT 1 Combined Shapefile')}/${encodeURIComponent('FIF CAT 1 Project Areas.geojson')}`,
         // clusterMaxZoom: 10, // Max zoom to cluster points on
         // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
     });
@@ -854,6 +854,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             typ: 'fill',
             color: 'orangered', 
             grup: 'Repetitive Loss',
+        },
+        {
+            id: 'GLO RBFS Project Team Study Area', 
+            subdir: `layers_jan_2023/${encodeURIComponent('GLO RBFS Project Team Study Area')}`,
+            typ: 'line',
+            color: 'red', 
+            grup: 'Boundaries',
+            lbl: '{TEAM}',
         }
     ]
     
@@ -1019,7 +1027,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     // National Land Cover Database
-    lyrId = 'Land Cover'
+    lyrId = 'Land Use'
 
     // TODO: Add bounds? 
     map.addSource(lyrId, {
@@ -1037,7 +1045,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             'paint': {}, 
             'layout': { 'visibility': 'none' } //on load
         },
-        'building' // Place layer under labels, roads and buildings.
+        //'building' // Place layer under labels, roads and buildings.
     );
 
     legendlyrs.push({
@@ -1045,6 +1053,87 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         hidden: false,
         group: "Built and Natural Environment Features",
         directory: "Legend"
+    })
+
+    // Land Cover (Percent Impervious)
+    lyrId = 'Land Cover'
+
+    map.addSource(lyrId, {
+        'type': 'raster',
+        "maxzoom": 10,
+        'tiles': [janlayerdir + 'Land_Cover/tiles_png/{z}/{x}/{y}.png'],
+        'tileSize': 256, 
+    });
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'raster',
+            'source': lyrId,
+            'paint': {}, 
+            'layout': { 'visibility': 'none' } //on load
+        },
+        //'building' // Place layer under labels, roads and buildings.
+    );
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Built and Natural Environment Features",
+        directory: "Legend"
+    })
+
+    // Soils
+    lyrId = 'Soil Types'
+
+    map.addSource(lyrId, {
+        type: 'vector',
+        tiles: [janlayerdir + 'Soils/tiles_pbf/{z}/{x}/{y}.pbf'],
+        minzoom: 0,
+        maxzoom: 10,
+    });
+    map.addLayer({
+        id: lyrId,
+        type: 'fill',
+        source: lyrId,
+        'source-layer': 'Neches_Soil',
+        'layout': { 'visibility': 'none' }, //on load
+        'paint': {
+            'fill-color': '#ffcc66',
+            'fill-opacity': .35
+        },
+    })
+
+    legendlyrs.push({
+        id: lyrId,
+        hidden: false,
+        group: "Built and Natural Environment Features",
+        directory: "Legend"
+    })
+
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    map.on('mousemove', lyrId, (event) => {
+        let features = event.features as Array<any>;
+        let html = '';
+
+        features.forEach(f => {
+            if (f.properties.muaggatt_m) {
+                html += `<span><strong>${f.properties.muaggatt_m}</strong> - ${f.properties.muaggatt_1}<br>`;
+            }
+        });
+
+        if (html.length > 0) {
+            popup
+                .setLngLat(event.lngLat)
+                // @ts-ignore
+                .setHTML(html)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+        }
     })
 
     //txdot overtopping
@@ -1452,7 +1541,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         },
         {
             id: 'NOAA Stream Gauges', 
-            url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges_fixed.geojson`,
+            url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges.geojson`,
             color: '#489DD5',
         },
         {
