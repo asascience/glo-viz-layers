@@ -1536,7 +1536,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     const observations = [
         {
             id: 'USGS Stream Gauges', 
-            url: `${janlayerdir}${encodeURIComponent('USGS Gages')}/Neches_gages_fixed.geojson`,
+            url: `${janlayerdir}${encodeURIComponent('USGS Gages')}/Neches_gages.geojson`,
             color: '#446100'
         },
         {
