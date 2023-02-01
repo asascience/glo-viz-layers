@@ -1027,7 +1027,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     // National Land Cover Database
-    lyrId = 'Land Use'
+    lyrId = 'Land Cover'
 
     // TODO: Add bounds? 
     map.addSource(lyrId, {
@@ -1055,8 +1055,8 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         directory: "Legend"
     })
 
-    // Land Cover (Percent Impervious)
-    lyrId = 'Land Cover'
+    // Land Use (Percent Impervious)
+    lyrId = 'Land Use'
 
     map.addSource(lyrId, {
         'type': 'raster',
