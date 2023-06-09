@@ -568,12 +568,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 
     map.on('mouseenter', lyrId, (event) => {
-        // @ts-ignore
-        if (event.features[0].properties.GNIS_Name != 'nan') {
+        const properties = event?.features?.[0]?.properties;
+        if (!properties) {
+            return;
+        }
+        if (properties.GNIS_Name != 'nan') {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.GNIS_Name}</strong>`)
+                .setHTML(`<strong>${properties.GNIS_Name}</strong>`)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
@@ -718,19 +720,19 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 
     map.on('mousemove', lyrId, (event) => {
-        // @ts-ignore
-        if ((event.features[0].properties.cluster ?? false) === true) {
+        const properties = event?.features?.[0]?.properties;
+        if (!properties) {
+            return;
+        }
+        if ((properties.cluster ?? false) === true) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.point_count} Projects</strong><br>`)
+                .setHTML(`<strong>${properties.point_count} Projects</strong><br>`)
                 .addTo(map);
-            // @ts-ignore
-        } else if (event.features[0].properties.Site_Title !== undefined) {
+        } else if (properties.Site_Title !== undefined) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+                .setHTML(`<strong>${properties.Site_Title}</strong><br>${properties.Status}`)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
@@ -787,7 +789,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (html.length > 0) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
                 .setHTML(html)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
@@ -1128,7 +1129,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (html.length > 0) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
                 .setHTML(html)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
@@ -1436,12 +1436,15 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         
         map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
         map.setLayoutProperty('zipcodes', 'visibility', 'visible');
-        // new mapboxgl.Popup()
+        const geometry = event?.features?.[0]?.geometry;
+        const properties = event?.features?.[0]?.properties;
+        if (!geometry || !properties) {
+            return;
+        }
         popup
-            // @ts-ignore
-            .setLngLat(event.features[0].geometry.coordinates)
-            // @ts-ignore
-            .setHTML(`<strong>Repetitive Loss Properties:</strong> ${event.features[0].properties.reptloss}<br>in zip code ${event.features[0].properties.id}`)
+        // @ts-ignore for nested geometry
+            .setLngLat(geometry.coordinates)
+            .setHTML(`<strong>Repetitive Loss Properties:</strong> ${properties.reptloss}<br>in zip code ${properties.id}`)
             .addTo(map);
         // // Copy coordinates array.
         // const coordinates = e.features[0].geometry.coordinates.slice();
@@ -1602,39 +1605,34 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
     
         map.on('mouseenter', o.id, (event) => {
-            // @ts-ignore
-            if (event.features[0].properties.Location) {
+            const properties = event?.features?.[0]?.properties;
+            if (!properties) {
+                return;
+            }
+            if (properties.Location) {
                 popup
                     .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Location}</strong><br><span>${event.features[0].properties.GaugeLID}</span>`)
+                    .setHTML(`<strong>${properties.Location}</strong><br><span>${properties.GaugeLID}</span>`)
                     .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.STATION_NM) {
+            } else if (properties.STATION_NM) {
                 popup
                     .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.STATION_NM}</strong><br><span>${event.features[0].properties.SITE_NO}</span>`)
+                    .setHTML(`<strong>${properties.STATION_NM}</strong><br><span>${properties.SITE_NO}</span>`)
                     .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.Name) {
+            } else if (properties.Name) {
                 popup
                     .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
+                    .setHTML(`<strong>${properties.Name}</strong>`)
                     .addTo(map);
                 // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.Field1) {
+            } else if (properties.Field1) {
                 popup
                     .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Field1}</strong><br><span>${event.features[0].properties.Field6}${typeof event.features[0].properties.Field7 === 'string' ? ' ' + event.features[0].properties.Field7 : ''}, ${event.features[0].properties.Field5}</span>`)
+                    .setHTML(`<strong>${properties.Field1}</strong><br><span>${properties.Field6}${typeof properties.Field7 === 'string' ? ' ' + properties.Field7 : ''}, ${properties.Field5}</span>`)
                     .addTo(map);
                 // Change the cursor style as a UI indicator.
                 map.getCanvas().style.cursor = 'pointer';
@@ -1744,65 +1742,65 @@ const restyle = async (layerId) => {
     });
 }
 
-// @ts-ignore
-for (const input of inputs) {
-    input.onclick = async (layer) => {
-
-        map.once("styledata", async () => {
-            await loadLayers()
-
-            //refresh lyrs
-            let params: any = await new URLSearchParams(window.location.search)
-            let myparams = await zip(params.keys(), Array.from(params.values()))
-
-            Array.from(params.keys()).forEach(param => {
-                params.delete(param)
-            })
-
-            // console.log(myparams)
-            myparams.forEach(param => {
-                params.set(param[0], param[1])
-            })
-            
-            let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
-            window.history.replaceState({
-                path: url
-            }, '', url);
-
-            let _layers = [...params.keys()];
-
-            _layers.map(function (l) {
-                // if (keys.indexOf(l) > -1) {
-                // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
-                // if (!visibility) {
-                map.setLayoutProperty(l, "visibility", "visible")
+if (inputs) {
+    for (const input of inputs) {
+        input.onclick = async (event) => {
+    
+            map.once("styledata", async () => {
+                await loadLayers()
+    
+                //refresh lyrs
+                let params: any = await new URLSearchParams(window.location.search)
+                let myparams = await zip(params.keys(), Array.from(params.values()))
+    
+                Array.from(params.keys()).forEach(param => {
+                    params.delete(param)
+                })
+    
+                // console.log(myparams)
+                myparams.forEach(param => {
+                    params.set(param[0], param[1])
+                })
+                
+                let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
+                window.history.replaceState({
+                    path: url
+                }, '', url);
+    
+                let _layers = [...params.keys()];
+    
+                _layers.map(function (l) {
+                    // if (keys.indexOf(l) > -1) {
+                    // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
+                    // if (!visibility) {
+                    map.setLayoutProperty(l, "visibility", "visible")
+                    // }
+                    // }
+                });
+    
+                // map.base_layers = darkv10.layers
+                // console.log(map.base_layers)
+                // map.hide_base_layers = function() {
+                //     for (var v in map.base_layers) {
+                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
+                //     }
                 // }
+                // map.show_base_layers = function() {
+                //     for (var v in map.base_layers) {
+                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
+                //     }
                 // }
+                // map.hide_base_layers()
+                // map.show_base_layers()
             });
-
-            // map.base_layers = darkv10.layers
-            // console.log(map.base_layers)
-            // map.hide_base_layers = function() {
-            //     for (var v in map.base_layers) {
-            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
-            //     }
-            // }
-            // map.show_base_layers = function() {
-            //     for (var v in map.base_layers) {
-            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
-            //     }
-            // }
-            // map.hide_base_layers()
-            // map.show_base_layers()
-        });
-
-        const layerId = layer.target.id;
-        // await restyle(layerId)
-        await map.setStyle('mapbox://styles/mapbox/' + layerId);
-        
+            const target = event?.target as HTMLButtonElement;
+            const layerId = target.id;
+            // await restyle(layerId)
+            await map.setStyle('mapbox://styles/mapbox/' + layerId);
+            
+        }
     }
 }
-
 
 // After the last frame rendered before the map enters an "idle" state.
 // map.on('idle', () => {
