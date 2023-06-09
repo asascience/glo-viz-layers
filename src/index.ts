@@ -1548,7 +1548,27 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             id: 'NOAA GHCN Gauges',
             url: `${janlayerdir}${encodeURIComponent('NOAA GHCN Gauges')}/${encodeURIComponent('NOAA GHCN Gauges')}.geojson`,
             color: '#2A76D5'
-        }
+        },
+        {
+            id: 'DD6 Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('DD6_Gauges')}.geojson`,
+            color: '#ff0000'
+        },
+        {
+            id: 'NOAA PRCP 15min Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_15min')}.geojson`,
+            color: '#ff0000'
+        },
+        {
+            id: 'NOAA PRCP Hourly Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_hourly')}.geojson`,
+            color: '#ff0000'
+        },
+        {
+            id: 'Southeast Texas Network Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('SouthEastTexasNetwork_LamarUniversity')}.geojson`,
+            color: '#ff0000'
+        },
     ]; 
 
     observations.forEach(o => {
