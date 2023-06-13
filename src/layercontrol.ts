@@ -1,9 +1,18 @@
 import { isString } from "./utils";
 
 export function lcCreateLayerToggle(map, layer, checked, sources) {
+    console.log(map)
+    console.log(layer)
+    console.log(checked)
+    console.log(sources)
     let div = document.createElement("div");
     div.className = "checkbox";
+    div.style.display = "flex";
+    div.style.width = "100%";
+    div.style.flexDirection = "row";
+    div.style.justifyContent = "between";
     div.title = "Map Layer";
+    let div2 = document.createElement("div");
 
     if (layer.hidden) {
         div.style.display = "none";
@@ -82,8 +91,21 @@ export function lcCreateLayerToggle(map, layer, checked, sources) {
     }
     label.dataset.layerToggle = "true";
 
-    div.appendChild(input);
-    div.appendChild(label);
+    let settings = document.createElement("div");
+    let colorPicker = document.createElement("div");
+    settings.innerHTML = `
+        set
+    `
+    settings.onclick = () => {
+        if (!map) return;
+        const mapLayer = map.getStyle()?.layers?.find(lyr => lyr.id === layer.id);
+        if (!layer) return;
+        map.setPaintProperty(mapLayer.id, "circle-color", "#ffffff")
+    }
+    div2.appendChild(input);
+    div2.appendChild(label);
+    div.appendChild(div2);
+    div.appendChild(settings);
 
     if (layer.metadata && layer.metadata.filterSchema) {
         let filterSpan = document.createElement("span");
@@ -217,7 +239,7 @@ export function lcCreateGroup(group, layers, map) {
     let titleInputLabel = document.createElement("label");
     titleInputLabel.setAttribute("for", titleInputId);
     titleInputLabel.className = "mgl-layerControlGroupHeading"
-    titleInputLabel.textContent = group;
+    titleInputLabel.textContent = group + " hello";
 
     // let titleSettings = document.createElement("span");
     // titleSettings.style.position = "absolute";

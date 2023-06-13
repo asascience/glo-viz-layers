@@ -1652,6 +1652,13 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 }
 
+document.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.code === 'KeyP' && map) {
+        console.log(map.getStyle())
+        console.log(map.getStyle()?.layers)
+    }
+});
+
 map.on('load', async () => {
     await loadMapboxImage(map, 'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png', 'custom-marker');
     await loadLayers()
