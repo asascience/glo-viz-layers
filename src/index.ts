@@ -15,7 +15,8 @@ let popup: mapboxgl.Popup;
 let playing = false
 let legendConfig: any;
 let hoveredId: string | number | null = null;
-interface LegendLayers {
+type LegendLayerRaster = {
+    type: "raster"
     id: string
     parent?: string
     children?: string[]
@@ -23,7 +24,28 @@ interface LegendLayers {
     group: string
     directory: string
 }
-let legendlyrs: LegendLayers[] = [];
+type LegendLayerVector = {
+    type: "vector"
+    id: string
+    parent?: string
+    children?: string[]
+    initialColor: string
+    paintPropertyType: "circle-color" | "line-color" | "fill-color"
+    hidden: boolean
+    group: string
+    directory: string
+}
+type LegendLayerSymbol = {
+    type: "symbol" // "symbol" represents heatmap and icon layers (cannot be styled with a single color)
+    id: string
+    parent?: string
+    children?: string[]
+    hidden: boolean
+    group: string
+    directory: string
+}
+type LegendLayer = LegendLayerRaster | LegendLayerVector | LegendLayerSymbol;
+let legendlyrs: LegendLayer[] = [];
 let reptLossData: any;
 const replossId = 'FEMA Severe Repetitive Loss Properties'
 
@@ -566,6 +588,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "vector",
+            initialColor: "#00ff00",
+            paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
             group: "Waterways",
@@ -717,6 +742,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "vector",
+            initialColor: "#00ff00",
+            paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
             group: "Mitigation Projects",
@@ -774,6 +802,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     legendlyrs.push(
         {
+            type: "symbol",
             id: lyrId,
             hidden: false,
             group: "Mitigation Projects",
@@ -922,6 +951,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (!lyr.hasOwnProperty('lbl')) {
             legendlyrs.push(
                 {
+                    type: "vector",
+                    initialColor: "#00ff00",
+                    paintPropertyType: "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -931,6 +963,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         } else {
             legendlyrs.push(
                 {
+                    type: "vector",
+                    initialColor: "#00ff00",
+                    paintPropertyType: "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -969,6 +1004,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             )
             legendlyrs.push(
                 {
+                    type: "symbol",
                     id: lyr.id + '-lbl',
                     hidden: true,
                     group: lyr.grup,
@@ -1030,6 +1066,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "raster",
             id: lyrId,
             hidden: false,
             group: "FEMA BLE",
@@ -1061,6 +1098,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     legendlyrs.push({
+        type: "raster",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1088,6 +1126,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     legendlyrs.push({
+        type: "raster",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1116,6 +1155,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     })
 
     legendlyrs.push({
+        type: "vector",
+        initialColor: "#00ff00",
+        paintPropertyType: "fill-color",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1186,6 +1228,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "vector",
+            initialColor: "#00ff00",
+            paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
             group: "Roadway Overtopping",
@@ -1278,6 +1323,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             
         legendlyrs.push(
             {
+                type: "vector",
+                initialColor: "#00ff00",
+                paintPropertyType: "line-color",
                 id: lyrId,
                 hidden: false,
                 group: "Boundaries",
@@ -1285,6 +1333,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 directory: "Legend"
             },
             {
+                type: "vector",
+                initialColor: "#00ff00",
+                paintPropertyType: "fill-color",
                 id: lyrId + '-fill',
                 parent: lyrId,
                 hidden: true,
@@ -1319,6 +1370,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
         
         legendlyrs.push({
+            type: "vector",
+            initialColor: "#00ff00",
+            paintPropertyType: "fill-color",
             id: lyrId,
             hidden: false,
             group: "FEMA Floodplain",
@@ -1407,6 +1461,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         addHeatmap(map, heatlyr);
         legendlyrs.push(
             {
+                type: "symbol",
                 id: heatlyr.id + "-point",
                 parent: heatlyr.id + "",
                 hidden: true,
@@ -1414,6 +1469,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 directory: "Legend"
             },
             {
+                type: "symbol",
                 id: heatlyr.id + "",
                 hidden: false,
                 children: [heatlyr.id + "-point"],
@@ -1604,6 +1660,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
     
         legendlyrs.push({
+            type: "vector",
+            paintPropertyType: "circle-color",
+            initialColor: o.color,
             id: o.id,
             hidden: false,
             group: "Observations",

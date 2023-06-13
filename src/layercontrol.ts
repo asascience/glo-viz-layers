@@ -1,4 +1,6 @@
 import { isString } from "./utils";
+import Picker from 'vanilla-picker';
+import 'vanilla-picker/dist/vanilla-picker.csp.css';
 
 export function lcCreateLayerToggle(map, layer, checked, sources) {
     console.log(map)
@@ -90,22 +92,32 @@ export function lcCreateLayerToggle(map, layer, checked, sources) {
         label.innerText = (!layer.name) ? layer.id : layer.name;
     }
     label.dataset.layerToggle = "true";
-
-    let settings = document.createElement("div");
-    let colorPicker = document.createElement("div");
-    settings.innerHTML = `
-        set
-    `
-    settings.onclick = () => {
-        if (!map) return;
-        const mapLayer = map.getStyle()?.layers?.find(lyr => lyr.id === layer.id);
-        if (!layer) return;
-        map.setPaintProperty(mapLayer.id, "circle-color", "#ffffff")
-    }
+    
     div2.appendChild(input);
     div2.appendChild(label);
     div.appendChild(div2);
-    div.appendChild(settings);
+
+    if (layer.type === "vector") {
+
+        let settingsButton = document.createElement("div");
+        settingsButton.innerHTML = `
+        set
+        `
+        let colorPicker = new Picker({
+            parent: settingsButton,
+            popup: "left",
+            alpha: false,
+            color: layer.initialColor,
+            onDone: (color) => {
+                if (!map) return;
+                const mapLayer = map.getStyle()?.layers?.find(lyr => lyr.id === layer.id);
+                if (!mapLayer) return;
+                map.setPaintProperty(mapLayer.id, layer.paintPropertyType, color.hex.substring(0, color.hex.length - 2))
+            }
+        });
+        div.appendChild(settingsButton);
+        
+    }
 
     if (layer.metadata && layer.metadata.filterSchema) {
         let filterSpan = document.createElement("span");

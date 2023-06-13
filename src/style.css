@@ -295,3 +295,7 @@ SPECTRE MODAL
   padding: .8rem;
   text-align: right;
 }
+
+.picker_wrapper {
+  z-index: 9999 !important;
+}
