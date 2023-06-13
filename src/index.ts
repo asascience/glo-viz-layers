@@ -23,7 +23,7 @@ interface LegendLayers {
     group: string
     directory: string
 }
-let legendlyrs: LegendLayers[];
+let legendlyrs: LegendLayers[] = [];
 let reptLossData: any;
 const replossId = 'FEMA Severe Repetitive Loss Properties'
 
