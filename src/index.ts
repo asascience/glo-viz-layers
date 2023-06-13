@@ -15,7 +15,15 @@ let popup: mapboxgl.Popup;
 let playing = false
 let legendConfig: any;
 let hoveredId: string | number | null = null;
-let legendlyrs: any[] = [];
+interface LegendLayers {
+    id: string
+    parent?: string
+    children?: string[]
+    hidden: boolean
+    group: string
+    directory: string
+}
+let legendlyrs: LegendLayers[];
 let reptLossData: any;
 const replossId = 'FEMA Severe Repetitive Loss Properties'
 
@@ -37,7 +45,10 @@ const map = new mapboxgl.Map({
     zoom: z0,
 });
 
-function addHeatmap(map, heatlyr, q0 = 1, q1 = 20, q2 = 300) {
+//TODO: use layer.setPaintProperty to set layer colors by id with a UI
+// edit the LayerControlGrouped component
+
+const addHeatmap = (map, heatlyr, q0 = 1, q1 = 20, q2 = 300) => {
     // q0-2: quantile distribution of heatlyr.densityAttr to base the heatmap color ramp off, (min, q50, max)
     let lyrId = heatlyr.id
     if (!heatlyr.hasOwnProperty('data')) {
@@ -1661,7 +1672,6 @@ map.on('load', async () => {
     // map.setLayoutProperty('HUC8', 'visibility', 'none')
     // map.setLayoutProperty('HUC10', 'visibility', 'none')
     // map.setLayoutProperty('HUC12', 'visibility', 'none')
-    
     
     popup = new mapboxgl.Popup({
         // className: "popup",
