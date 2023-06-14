@@ -3,18 +3,18 @@ import Picker from 'vanilla-picker';
 import 'vanilla-picker/dist/vanilla-picker.csp.css';
 
 export function lcCreateLayerToggle(map, layer, checked, sources) {
-    console.log(map)
-    console.log(layer)
-    console.log(checked)
-    console.log(sources)
+    let containerDiv = document.createElement("div");
+    containerDiv.style.display = "flex";
+    containerDiv.style.width = "100%";
+    containerDiv.style.flexDirection = "column";
     let div = document.createElement("div");
     div.className = "checkbox";
     div.style.display = "flex";
     div.style.width = "100%";
     div.style.flexDirection = "row";
     div.style.justifyContent = "between";
+    div.style.gap = "4pxs";
     div.title = "Map Layer";
-    let div2 = document.createElement("div");
 
     if (layer.hidden) {
         div.style.display = "none";
@@ -93,30 +93,50 @@ export function lcCreateLayerToggle(map, layer, checked, sources) {
     }
     label.dataset.layerToggle = "true";
     
-    div2.appendChild(input);
-    div2.appendChild(label);
-    div.appendChild(div2);
+    const layerRowDiv = document.createElement("div");
+    layerRowDiv.appendChild(input);
+    layerRowDiv.appendChild(label);
+    div.appendChild(layerRowDiv);
 
+    const pickerId = `picker-div-${layer.id.replaceAll(" ","_")}`;
+    const pickerDiv = document.createElement("div");
+    pickerDiv.id = pickerId;
+    pickerDiv.style.height = "0px";
+    pickerDiv.style.overflow = "hidden";
+    pickerDiv.style.transition = "all 0.2s";
+    
     if (layer.type === "vector") {
-
-        let settingsButton = document.createElement("div");
-        settingsButton.innerHTML = `
-        set
-        `
+        // Add a color picker
+        const settingsButton = document.createElement("div");
+        settingsButton.innerHTML = `<img src="gear.svg" style="width: 16px; height: 16px;" />`;
+        settingsButton.onclick = () => {
+            // Find the corresponding picker div and expand/collapse it
+            const el = document.querySelector("#"+pickerId) as HTMLElement;
+            if (!el) return;
+            if (el.style.height === "0px") {
+                el.style.height = "320px";
+            } else {
+                el.style.height = "0px";
+            }
+        }
         let colorPicker = new Picker({
-            parent: settingsButton,
-            popup: "left",
+            parent: pickerDiv,
+            popup: false,
             alpha: false,
             color: layer.initialColor,
-            onDone: (color) => {
+            onChange: (color) => {
                 if (!map) return;
-                const mapLayer = map.getStyle()?.layers?.find(lyr => lyr.id === layer.id);
+                const mapLayer = map.getStyle()?.layers?.find(styleLayer => styleLayer.id === layer.id);
                 if (!mapLayer) return;
-                map.setPaintProperty(mapLayer.id, layer.paintPropertyType, color.hex.substring(0, color.hex.length - 2))
+                try {
+                    map.setPaintProperty(mapLayer.id, layer.paintPropertyType, color.hex.substring(0, color.hex.length - 2))
+                } catch (e) {
+                    console.log(e)
+                }
             }
         });
         div.appendChild(settingsButton);
-        
+
     }
 
     if (layer.metadata && layer.metadata.filterSchema) {
@@ -138,10 +158,12 @@ export function lcCreateLayerToggle(map, layer, checked, sources) {
         }
         div.appendChild(filterSpan)
     }
-
+    
     div.appendChild(legend);
-
-    return { layerSelector: div, newSources: sources }
+    containerDiv.appendChild(div)
+    containerDiv.appendChild(pickerDiv);
+    
+    return { layerSelector: containerDiv, newSources: sources }
 }
 
 function lcCheckLazyLoading(map, layer) {
@@ -251,7 +273,7 @@ export function lcCreateGroup(group, layers, map) {
     let titleInputLabel = document.createElement("label");
     titleInputLabel.setAttribute("for", titleInputId);
     titleInputLabel.className = "mgl-layerControlGroupHeading"
-    titleInputLabel.textContent = group + " hello";
+    titleInputLabel.textContent = group;
 
     // let titleSettings = document.createElement("span");
     // titleSettings.style.position = "absolute";

@@ -296,6 +296,7 @@ SPECTRE MODAL
   text-align: right;
 }
 
-.picker_wrapper {
-  z-index: 9999 !important;
+/* Override color picker OK button */
+.picker_done {
+  display: none;
 }

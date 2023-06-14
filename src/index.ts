@@ -589,7 +589,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     legendlyrs.push(
         {
             type: "vector",
-            initialColor: "#00ff00",
+            initialColor: "rgb(60, 129, 255)",
             paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
@@ -742,9 +742,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
-            type: "vector",
-            initialColor: "#00ff00",
-            paintPropertyType: "line-color",
+            type: "symbol",
             id: lyrId,
             hidden: false,
             group: "Mitigation Projects",
@@ -952,8 +950,8 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             legendlyrs.push(
                 {
                     type: "vector",
-                    initialColor: "#00ff00",
-                    paintPropertyType: "line-color",
+                    initialColor: lyr.color,
+                    paintPropertyType: lyr.typ === "fill" ? "fill-color" : "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -964,8 +962,8 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             legendlyrs.push(
                 {
                     type: "vector",
-                    initialColor: "#00ff00",
-                    paintPropertyType: "line-color",
+                    initialColor: lyr.color,
+                    paintPropertyType: lyr.typ === "fill" ? "fill-color" : "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -1156,7 +1154,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     legendlyrs.push({
         type: "vector",
-        initialColor: "#00ff00",
+        initialColor: "#ffcc66",
         paintPropertyType: "fill-color",
         id: lyrId,
         hidden: false,
@@ -1324,7 +1322,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         legendlyrs.push(
             {
                 type: "vector",
-                initialColor: "#00ff00",
+                initialColor: "#ffffff",
                 paintPropertyType: "line-color",
                 id: lyrId,
                 hidden: false,
@@ -1334,7 +1332,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             },
             {
                 type: "vector",
-                initialColor: "#00ff00",
+                initialColor: "#ffffff",
                 paintPropertyType: "fill-color",
                 id: lyrId + '-fill',
                 parent: lyrId,
@@ -1371,7 +1369,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         
         legendlyrs.push({
             type: "vector",
-            initialColor: "#00ff00",
+            initialColor: colrs[lyrId],
             paintPropertyType: "fill-color",
             id: lyrId,
             hidden: false,
@@ -1607,37 +1605,44 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         {
             id: 'USGS Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('USGS Gages')}/Neches_gages.geojson`,
-            color: '#446100'
+            color: '#446100',
+            popupHtml: (properties) => `<strong>${properties.fid ?? ""}</strong>`,
         },
         {
             id: 'NOAA Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges.geojson`,
             color: '#489DD5',
+            popupHtml: (properties) => `<strong>${properties.Location ?? ""}</strong><br><span>${properties.GaugeLID ?? ""}</span>`,
         },
         {
             id: 'NOAA GHCN Gauges',
             url: `${janlayerdir}${encodeURIComponent('NOAA GHCN Gauges')}/${encodeURIComponent('NOAA GHCN Gauges')}.geojson`,
-            color: '#2A76D5'
+            color: '#2A76D5',
+            popupHtml: (properties) => `<strong>${properties.Field1 ?? ""}</strong><br><span>${properties.Field6 ?? ""}${properties.Field7 ?? ""}, ${properties.Field5 ?? ""}</span>`,
         },
         {
             id: 'DD6 Gauges',
             url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('DD6_Gauges')}.geojson`,
-            color: '#ff0000'
+            color: '#92dc7e',
+            popupHtml: (properties) => `<strong>${properties.Location ?? ""}</strong><br><span>${properties.GaugeLID ?? ""}</span>`,
         },
         {
             id: 'NOAA PRCP 15min Gauges',
             url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_15min')}.geojson`,
-            color: '#ff0000'
+            color: '#64c987',
+            popupHtml: (properties) => `<strong>${properties.STATION_ID + " " ?? ""}${properties.STATION ?? ""}</strong>`,
         },
         {
             id: 'NOAA PRCP Hourly Gauges',
             url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_hourly')}.geojson`,
-            color: '#ff0000'
+            color: '#64c987',
+            popupHtml: (properties) => `<strong>${properties.STATION_ID + " " ?? ""}${properties.STATION ?? ""}</strong>`,
         },
         {
             id: 'Southeast Texas Network Gauges',
             url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('SouthEastTexasNetwork_LamarUniversity')}.geojson`,
-            color: '#ff0000'
+            color: '#00898a',
+            popupHtml: (properties) => `<strong>${properties.c_site_id + " " ?? ""}${properties.d_sensor_a ?? ""}</strong><br><span>${properties.j_descript ?? ""}</span>`,
         },
     ]; 
 
@@ -1668,46 +1673,22 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             group: "Observations",
             directory: "Legend"
         });
+    
+        // Add popup for gauge layers
+        map.on('mouseenter', o.id, (event) => {
+            const properties = event?.features?.[0]?.properties;
+            if (!properties) return;
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(o.popupHtml(properties))
+                .addTo(map);
+            map.getCanvas().style.cursor = 'pointer';
+        });
 
         map.on('mouseleave', o.id, () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
         });
-    
-        map.on('mouseenter', o.id, (event) => {
-            const properties = event?.features?.[0]?.properties;
-            if (!properties) {
-                return;
-            }
-            if (properties.Location) {
-                popup
-                    .setLngLat(event.lngLat)
-                    .setHTML(`<strong>${properties.Location}</strong><br><span>${properties.GaugeLID}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-            } else if (properties.STATION_NM) {
-                popup
-                    .setLngLat(event.lngLat)
-                    .setHTML(`<strong>${properties.STATION_NM}</strong><br><span>${properties.SITE_NO}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-            } else if (properties.Name) {
-                popup
-                    .setLngLat(event.lngLat)
-                    .setHTML(`<strong>${properties.Name}</strong>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-            } else if (properties.Field1) {
-                popup
-                    .setLngLat(event.lngLat)
-                    .setHTML(`<strong>${properties.Field1}</strong><br><span>${properties.Field6}${typeof properties.Field7 === 'string' ? ' ' + properties.Field7 : ''}, ${properties.Field5}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-            }
-        })
     });
 }
 
