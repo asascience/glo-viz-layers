@@ -67,9 +67,6 @@ const map = new mapboxgl.Map({
     zoom: z0,
 });
 
-//TODO: use layer.setPaintProperty to set layer colors by id with a UI
-// edit the LayerControlGrouped component
-
 const addHeatmap = (map, heatlyr, q0 = 1, q1 = 20, q2 = 300) => {
     // q0-2: quantile distribution of heatlyr.densityAttr to base the heatmap color ramp off, (min, q50, max)
     let lyrId = heatlyr.id
@@ -1691,13 +1688,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
     });
 }
-
-document.addEventListener("keydown", (e: KeyboardEvent) => {
-    if (e.code === 'KeyP' && map) {
-        console.log(map.getStyle())
-        console.log(map.getStyle()?.layers)
-    }
-});
 
 map.on('load', async () => {
     await loadMapboxImage(map, 'https://docs.mapbox.com/mapbox-gl-js/assets/custom_marker.png', 'custom-marker');
