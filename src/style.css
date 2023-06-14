@@ -295,3 +295,8 @@ SPECTRE MODAL
   padding: .8rem;
   text-align: right;
 }
+
+/* Override color picker OK button */
+.picker_done {
+  display: none;
+}

@@ -15,7 +15,37 @@ let popup: mapboxgl.Popup;
 let playing = false
 let legendConfig: any;
 let hoveredId: string | number | null = null;
-let legendlyrs: any[] = [];
+type LegendLayerRaster = {
+    type: "raster"
+    id: string
+    parent?: string
+    children?: string[]
+    hidden: boolean
+    group: string
+    directory: string
+}
+type LegendLayerVector = {
+    type: "vector"
+    id: string
+    parent?: string
+    children?: string[]
+    initialColor: string
+    paintPropertyType: "circle-color" | "line-color" | "fill-color"
+    hidden: boolean
+    group: string
+    directory: string
+}
+type LegendLayerSymbol = {
+    type: "symbol" // "symbol" represents heatmap and icon layers (cannot be styled with a single color)
+    id: string
+    parent?: string
+    children?: string[]
+    hidden: boolean
+    group: string
+    directory: string
+}
+type LegendLayer = LegendLayerRaster | LegendLayerVector | LegendLayerSymbol;
+let legendlyrs: LegendLayer[] = [];
 let reptLossData: any;
 const replossId = 'FEMA Severe Repetitive Loss Properties'
 
@@ -37,7 +67,7 @@ const map = new mapboxgl.Map({
     zoom: z0,
 });
 
-function addHeatmap(map, heatlyr, q0 = 1, q1 = 20, q2 = 300) {
+const addHeatmap = (map, heatlyr, q0 = 1, q1 = 20, q2 = 300) => {
     // q0-2: quantile distribution of heatlyr.densityAttr to base the heatmap color ramp off, (min, q50, max)
     let lyrId = heatlyr.id
     if (!heatlyr.hasOwnProperty('data')) {
@@ -555,6 +585,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "vector",
+            initialColor: "rgb(60, 129, 255)",
+            paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
             group: "Waterways",
@@ -568,12 +601,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 
     map.on('mouseenter', lyrId, (event) => {
-        // @ts-ignore
-        if (event.features[0].properties.GNIS_Name != 'nan') {
+        const properties = event?.features?.[0]?.properties;
+        if (!properties) {
+            return;
+        }
+        if (properties.GNIS_Name != 'nan') {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.GNIS_Name}</strong>`)
+                .setHTML(`<strong>${properties.GNIS_Name}</strong>`)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
@@ -704,6 +739,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "symbol",
             id: lyrId,
             hidden: false,
             group: "Mitigation Projects",
@@ -718,19 +754,19 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     });
 
     map.on('mousemove', lyrId, (event) => {
-        // @ts-ignore
-        if ((event.features[0].properties.cluster ?? false) === true) {
+        const properties = event?.features?.[0]?.properties;
+        if (!properties) {
+            return;
+        }
+        if ((properties.cluster ?? false) === true) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.point_count} Projects</strong><br>`)
+                .setHTML(`<strong>${properties.point_count} Projects</strong><br>`)
                 .addTo(map);
-            // @ts-ignore
-        } else if (event.features[0].properties.Site_Title !== undefined) {
+        } else if (properties.Site_Title !== undefined) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
-                .setHTML(`<strong>${event.features[0].properties.Site_Title}</strong><br>${event.features[0].properties.Status}`)
+                .setHTML(`<strong>${properties.Site_Title}</strong><br>${properties.Status}`)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
             map.getCanvas().style.cursor = 'pointer';
@@ -761,6 +797,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
 
     legendlyrs.push(
         {
+            type: "symbol",
             id: lyrId,
             hidden: false,
             group: "Mitigation Projects",
@@ -787,7 +824,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (html.length > 0) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
                 .setHTML(html)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
@@ -910,6 +946,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (!lyr.hasOwnProperty('lbl')) {
             legendlyrs.push(
                 {
+                    type: "vector",
+                    initialColor: lyr.color,
+                    paintPropertyType: lyr.typ === "fill" ? "fill-color" : "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -919,6 +958,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         } else {
             legendlyrs.push(
                 {
+                    type: "vector",
+                    initialColor: lyr.color,
+                    paintPropertyType: lyr.typ === "fill" ? "fill-color" : "line-color",
                     id: lyr.id,
                     hidden: false,
                     group: lyr.grup,
@@ -957,6 +999,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             )
             legendlyrs.push(
                 {
+                    type: "symbol",
                     id: lyr.id + '-lbl',
                     hidden: true,
                     group: lyr.grup,
@@ -1018,6 +1061,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "raster",
             id: lyrId,
             hidden: false,
             group: "FEMA BLE",
@@ -1049,6 +1093,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     legendlyrs.push({
+        type: "raster",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1076,6 +1121,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     );
 
     legendlyrs.push({
+        type: "raster",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1104,6 +1150,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     })
 
     legendlyrs.push({
+        type: "vector",
+        initialColor: "#ffcc66",
+        paintPropertyType: "fill-color",
         id: lyrId,
         hidden: false,
         group: "Built and Natural Environment Features",
@@ -1128,7 +1177,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         if (html.length > 0) {
             popup
                 .setLngLat(event.lngLat)
-                // @ts-ignore
                 .setHTML(html)
                 .addTo(map);
             // Change the cursor style as a UI indicator.
@@ -1175,6 +1223,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     )
     legendlyrs.push(
         {
+            type: "vector",
+            initialColor: "#00ff00",
+            paintPropertyType: "line-color",
             id: lyrId,
             hidden: false,
             group: "Roadway Overtopping",
@@ -1267,6 +1318,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             
         legendlyrs.push(
             {
+                type: "vector",
+                initialColor: "#ffffff",
+                paintPropertyType: "line-color",
                 id: lyrId,
                 hidden: false,
                 group: "Boundaries",
@@ -1274,6 +1328,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 directory: "Legend"
             },
             {
+                type: "vector",
+                initialColor: "#ffffff",
+                paintPropertyType: "fill-color",
                 id: lyrId + '-fill',
                 parent: lyrId,
                 hidden: true,
@@ -1308,6 +1365,9 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
         
         legendlyrs.push({
+            type: "vector",
+            initialColor: colrs[lyrId],
+            paintPropertyType: "fill-color",
             id: lyrId,
             hidden: false,
             group: "FEMA Floodplain",
@@ -1396,6 +1456,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         addHeatmap(map, heatlyr);
         legendlyrs.push(
             {
+                type: "symbol",
                 id: heatlyr.id + "-point",
                 parent: heatlyr.id + "",
                 hidden: true,
@@ -1403,6 +1464,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 directory: "Legend"
             },
             {
+                type: "symbol",
                 id: heatlyr.id + "",
                 hidden: false,
                 children: [heatlyr.id + "-point"],
@@ -1436,12 +1498,15 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         
         map.moveLayer('zipcodes', 'FEMA Severe Repetitive Loss Properties');
         map.setLayoutProperty('zipcodes', 'visibility', 'visible');
-        // new mapboxgl.Popup()
+        const geometry = event?.features?.[0]?.geometry;
+        const properties = event?.features?.[0]?.properties;
+        if (!geometry || !properties) {
+            return;
+        }
         popup
-            // @ts-ignore
-            .setLngLat(event.features[0].geometry.coordinates)
-            // @ts-ignore
-            .setHTML(`<strong>Repetitive Loss Properties:</strong> ${event.features[0].properties.reptloss}<br>in zip code ${event.features[0].properties.id}`)
+        // @ts-ignore for nested geometry
+            .setLngLat(geometry.coordinates)
+            .setHTML(`<strong>Repetitive Loss Properties:</strong> ${properties.reptloss}<br>in zip code ${properties.id}`)
             .addTo(map);
         // // Copy coordinates array.
         // const coordinates = e.features[0].geometry.coordinates.slice();
@@ -1537,18 +1602,45 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         {
             id: 'USGS Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('USGS Gages')}/Neches_gages.geojson`,
-            color: '#446100'
+            color: '#446100',
+            popupHtml: (properties) => `<strong>${properties.fid ?? ""}</strong>`,
         },
         {
             id: 'NOAA Stream Gauges', 
             url: `${janlayerdir}${encodeURIComponent('NOAA Gages')}/NOAA_Gauges.geojson`,
             color: '#489DD5',
+            popupHtml: (properties) => `<strong>${properties.Location ?? ""}</strong><br><span>${properties.GaugeLID ?? ""}</span>`,
         },
         {
             id: 'NOAA GHCN Gauges',
             url: `${janlayerdir}${encodeURIComponent('NOAA GHCN Gauges')}/${encodeURIComponent('NOAA GHCN Gauges')}.geojson`,
-            color: '#2A76D5'
-        }
+            color: '#2A76D5',
+            popupHtml: (properties) => `<strong>${properties.Field1 ?? ""}</strong><br><span>${properties.Field6 ?? ""}${properties.Field7 ?? ""}, ${properties.Field5 ?? ""}</span>`,
+        },
+        {
+            id: 'DD6 Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('DD6_Gauges')}.geojson`,
+            color: '#92dc7e',
+            popupHtml: (properties) => `<strong>${properties.Location ?? ""}</strong><br><span>${properties.GaugeLID ?? ""}</span>`,
+        },
+        {
+            id: 'NOAA PRCP 15min Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_15min')}.geojson`,
+            color: '#64c987',
+            popupHtml: (properties) => `<strong>${properties.STATION_ID + " " ?? ""}${properties.STATION ?? ""}</strong>`,
+        },
+        {
+            id: 'NOAA PRCP Hourly Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('NOAA_PRCP_hourly')}.geojson`,
+            color: '#64c987',
+            popupHtml: (properties) => `<strong>${properties.STATION_ID + " " ?? ""}${properties.STATION ?? ""}</strong>`,
+        },
+        {
+            id: 'Southeast Texas Network Gauges',
+            url: `${janlayerdir}${encodeURIComponent('GageLocation')}/${encodeURIComponent('SouthEastTexasNetwork_LamarUniversity')}.geojson`,
+            color: '#00898a',
+            popupHtml: (properties) => `<strong>${properties.c_site_id + " " ?? ""}${properties.d_sensor_a ?? ""}</strong><br><span>${properties.j_descript ?? ""}</span>`,
+        },
     ]; 
 
     observations.forEach(o => {
@@ -1570,56 +1662,30 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         });
     
         legendlyrs.push({
+            type: "vector",
+            paintPropertyType: "circle-color",
+            initialColor: o.color,
             id: o.id,
             hidden: false,
             group: "Observations",
             directory: "Legend"
+        });
+    
+        // Add popup for gauge layers
+        map.on('mouseenter', o.id, (event) => {
+            const properties = event?.features?.[0]?.properties;
+            if (!properties) return;
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(o.popupHtml(properties))
+                .addTo(map);
+            map.getCanvas().style.cursor = 'pointer';
         });
 
         map.on('mouseleave', o.id, () => {
             map.getCanvas().style.cursor = '';
             popup.remove();
         });
-    
-        map.on('mouseenter', o.id, (event) => {
-            // @ts-ignore
-            if (event.features[0].properties.Location) {
-                popup
-                    .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Location}</strong><br><span>${event.features[0].properties.GaugeLID}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.STATION_NM) {
-                popup
-                    .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.STATION_NM}</strong><br><span>${event.features[0].properties.SITE_NO}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.Name) {
-                popup
-                    .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Name}</strong>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-                // @ts-ignore
-            } else if (event.features[0].properties.Field1) {
-                popup
-                    .setLngLat(event.lngLat)
-                    // @ts-ignore
-                    .setHTML(`<strong>${event.features[0].properties.Field1}</strong><br><span>${event.features[0].properties.Field6}${typeof event.features[0].properties.Field7 === 'string' ? ' ' + event.features[0].properties.Field7 : ''}, ${event.features[0].properties.Field5}</span>`)
-                    .addTo(map);
-                // Change the cursor style as a UI indicator.
-                map.getCanvas().style.cursor = 'pointer';
-            }
-        })
     });
 }
 
@@ -1643,7 +1709,6 @@ map.on('load', async () => {
     // map.setLayoutProperty('HUC8', 'visibility', 'none')
     // map.setLayoutProperty('HUC10', 'visibility', 'none')
     // map.setLayoutProperty('HUC12', 'visibility', 'none')
-    
     
     popup = new mapboxgl.Popup({
         // className: "popup",
@@ -1724,65 +1789,65 @@ const restyle = async (layerId) => {
     });
 }
 
-// @ts-ignore
-for (const input of inputs) {
-    input.onclick = async (layer) => {
-
-        map.once("styledata", async () => {
-            await loadLayers()
-
-            //refresh lyrs
-            let params: any = await new URLSearchParams(window.location.search)
-            let myparams = await zip(params.keys(), Array.from(params.values()))
-
-            Array.from(params.keys()).forEach(param => {
-                params.delete(param)
-            })
-
-            // console.log(myparams)
-            myparams.forEach(param => {
-                params.set(param[0], param[1])
-            })
-            
-            let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
-            window.history.replaceState({
-                path: url
-            }, '', url);
-
-            let _layers = [...params.keys()];
-
-            _layers.map(function (l) {
-                // if (keys.indexOf(l) > -1) {
-                // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
-                // if (!visibility) {
-                map.setLayoutProperty(l, "visibility", "visible")
+if (inputs) {
+    for (const input of inputs) {
+        input.onclick = async (event) => {
+    
+            map.once("styledata", async () => {
+                await loadLayers()
+    
+                //refresh lyrs
+                let params: any = await new URLSearchParams(window.location.search)
+                let myparams = await zip(params.keys(), Array.from(params.values()))
+    
+                Array.from(params.keys()).forEach(param => {
+                    params.delete(param)
+                })
+    
+                // console.log(myparams)
+                myparams.forEach(param => {
+                    params.set(param[0], param[1])
+                })
+                
+                let url = window.location.protocol + "//" + window.location.host + window.location.pathname + "?" + params.toString() + window.location.hash;
+                window.history.replaceState({
+                    path: url
+                }, '', url);
+    
+                let _layers = [...params.keys()];
+    
+                _layers.map(function (l) {
+                    // if (keys.indexOf(l) > -1) {
+                    // let visibility = GetLayerVisibility(_mapLayers, _ids, l);
+                    // if (!visibility) {
+                    map.setLayoutProperty(l, "visibility", "visible")
+                    // }
+                    // }
+                });
+    
+                // map.base_layers = darkv10.layers
+                // console.log(map.base_layers)
+                // map.hide_base_layers = function() {
+                //     for (var v in map.base_layers) {
+                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
+                //     }
                 // }
+                // map.show_base_layers = function() {
+                //     for (var v in map.base_layers) {
+                //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
+                //     }
                 // }
+                // map.hide_base_layers()
+                // map.show_base_layers()
             });
-
-            // map.base_layers = darkv10.layers
-            // console.log(map.base_layers)
-            // map.hide_base_layers = function() {
-            //     for (var v in map.base_layers) {
-            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'none');
-            //     }
-            // }
-            // map.show_base_layers = function() {
-            //     for (var v in map.base_layers) {
-            //         map.setLayoutProperty(map.base_layers[v]['id'], 'visibility', 'visible');
-            //     }
-            // }
-            // map.hide_base_layers()
-            // map.show_base_layers()
-        });
-
-        const layerId = layer.target.id;
-        // await restyle(layerId)
-        await map.setStyle('mapbox://styles/mapbox/' + layerId);
-        
+            const target = event?.target as HTMLButtonElement;
+            const layerId = target.id;
+            // await restyle(layerId)
+            await map.setStyle('mapbox://styles/mapbox/' + layerId);
+            
+        }
     }
 }
-
 
 // After the last frame rendered before the map enters an "idle" state.
 // map.on('idle', () => {
