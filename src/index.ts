@@ -830,7 +830,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             map.getCanvas().style.cursor = 'pointer';
         }
     })    
-    
+    // test
     const lyrz = [
         {
             id: 'Natural Gas Pipelines',
