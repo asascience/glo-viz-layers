@@ -773,6 +773,86 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         }
     });
 
+    lyrId = 'TIGR_Infra_Project_Sites'
+
+    map.addSource(lyrId + '-src', {
+        type: 'geojson',
+        data: janlayerdir + 'TIGR_Infra_Project_Sites.geojson',
+        cluster: true,
+        // clusterMaxZoom: 10, // Max zoom to cluster points on
+        // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
+    });
+
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'symbol',
+            'source': lyrId + '-src',
+            'layout': {
+                'icon-image': 'custom-marker',
+                'text-field':
+                    ['case', ['has', 'cluster'],
+                        ['to-string', ['get', 'point_count']],
+                        ['get', 'Applicant']
+                    ],
+                'text-font': [
+                    'Open Sans Semibold',
+                    'Arial Unicode MS Bold'
+                ],
+                'text-offset': [0, 1.25],
+                'text-anchor': 'top',
+                'visibility': 'none'
+            }
+            , paint: {
+                "text-color": [
+                    'case',
+                    ['has', 'Status'],
+                    [
+                        'match',
+                        ["get", "Status"], "Application Approved",
+                        'rgb(21, 255, 0)', 'yellow'],
+                    'white'],
+                'text-halo-width': 2,
+                'text-halo-blur': 1,
+                'text-halo-color': 'black',
+            }
+        }
+    )
+    legendlyrs.push(
+        {
+            type: "symbol",
+            id: lyrId,
+            hidden: false,
+            group: "Mitigation Projects",
+            directory: "Legend"
+        }
+    );
+
+    map.on('mouseleave', lyrId, () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+    });
+
+    map.on('mousemove', lyrId, (event) => {
+        const properties = event?.features?.[0]?.properties;
+        if (!properties) {
+            return;
+        }
+        if ((properties.cluster ?? false) === true) {
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(`<strong>${properties.point_count} Projects</strong><br>`)
+                .addTo(map);
+        } else if (properties.Site_Title !== undefined) {
+            popup
+                .setLngLat(event.lngLat)
+                .setHTML(`<strong>${properties.Site_Title}</strong><br>${properties.Status}`)
+                .addTo(map);
+            // Change the cursor style as a UI indicator.
+            map.getCanvas().style.cursor = 'pointer';
+        }
+    });
+
     lyrId = 'TWDB FIF Projects'
 
     map.addSource(lyrId + '-src', {
@@ -830,7 +910,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             map.getCanvas().style.cursor = 'pointer';
         }
     })    
-    // test
+
     const lyrz = [
         {
             id: 'Natural Gas Pipelines',
@@ -868,7 +948,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: 'darkviolet', 
             grup: "Boundaries",
             lbl: '{Name}'
-        }, 
+        },
         {
             id: 'RPS Project Limits',
             subdir: `layers_jan_2023/${encodeURIComponent('RPS Project Limits')}`,
