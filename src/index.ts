@@ -773,11 +773,11 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         }
     });
 
-    lyrId = 'TIGR_Infra_Project_Sites'
+    lyrId = 'TIGR Infrastructure Project Sites'
 
     map.addSource(lyrId + '-src', {
         type: 'geojson',
-        data: janlayerdir + 'TIGR_Infra_Project_Sites.geojson',
+        data: janlayerdir + 'Infrastructure_Project_Sites/TIGR_Infra_Project_Sites.geojson',
         cluster: true,
         // clusterMaxZoom: 10, // Max zoom to cluster points on
         // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
@@ -793,7 +793,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'text-field':
                     ['case', ['has', 'cluster'],
                         ['to-string', ['get', 'point_count']],
-                        ['get', 'Applicant']
+                        ['get', 'Site Title']
                     ],
                 'text-font': [
                     'Open Sans Semibold',
@@ -804,14 +804,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
                 'visibility': 'none'
             }
             , paint: {
-                "text-color": [
-                    'case',
-                    ['has', 'Status'],
-                    [
-                        'match',
-                        ["get", "Status"], "Application Approved",
-                        'rgb(21, 255, 0)', 'yellow'],
-                    'white'],
+                "text-color": 'white',
                 'text-halo-width': 2,
                 'text-halo-blur': 1,
                 'text-halo-color': 'black',
@@ -827,31 +820,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             directory: "Legend"
         }
     );
-
-    map.on('mouseleave', lyrId, () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-    });
-
-    map.on('mousemove', lyrId, (event) => {
-        const properties = event?.features?.[0]?.properties;
-        if (!properties) {
-            return;
-        }
-        if ((properties.cluster ?? false) === true) {
-            popup
-                .setLngLat(event.lngLat)
-                .setHTML(`<strong>${properties.point_count} Projects</strong><br>`)
-                .addTo(map);
-        } else if (properties.Site_Title !== undefined) {
-            popup
-                .setLngLat(event.lngLat)
-                .setHTML(`<strong>${properties.Site_Title}</strong><br>${properties.Status}`)
-                .addTo(map);
-            // Change the cursor style as a UI indicator.
-            map.getCanvas().style.cursor = 'pointer';
-        }
-    });
 
     lyrId = 'TWDB FIF Projects'
 
