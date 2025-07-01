@@ -1284,37 +1284,74 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     const huclyrs = ['HUC8', 'HUC10', 'HUC12'];
     huclyrs.forEach(lyrId => {
 
-        map.addSource(lyrId, {
-            'type': 'geojson',
-            'data': huclyrdir + lyrId + '.geojson'
-        })
-
-        map.addLayer(
-            {
-                'id': lyrId,
-                'type': 'line',
-                'source': lyrId,
+        if (lyrId === "HUC8") {
+            map.addSource(lyrId, {
+                type: 'vector',
+                tiles: [janlayerdir + 'huc8-tiles/{z}/{x}/{y}.pbf'],
+                minzoom: 0,
+                maxzoom: 10,
+            });
+            map.addLayer({
+                id: lyrId,
+                type: 'line',
+                source: lyrId,
+                'source-layer': 'TX_HUC8_v2',
+                'layout': { 'visibility': 'none' }, //on load
                 'paint': {
                     'line-color': '#ffffff',
                     'line-width': 12 * 12 * 12 * 12 * .5 / Math.pow(parseInt(lyrId.replace('HUC', '')), 4),
                     'line-opacity': .8
                 },
-                'layout': { 'visibility': 'none' } //on load
-            }
-            // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
-        map.addLayer(
-            {
-                'id': lyrId + '-fill',
-                'type': 'fill',
-                'source': lyrId,
-                'paint': {
-                    'fill-opacity': 0
-                },
-                'layout': { 'visibility': 'none' } //on load
-            }
-            // ,'FEMA Severe Repetitive Loss Properties' //add underneath
-        )
+            })
+            map.addLayer(
+                {
+                    'id': lyrId + '-fill',
+                    'type': 'fill',
+                    'source': lyrId,
+                    'source-layer': 'TX_HUC8_v2',
+                    'paint': {
+                        'fill-opacity': 0
+                    },
+                    'layout': { 'visibility': 'none' } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            )
+        } else {
+            map.addSource(lyrId, {
+                'type': 'geojson',
+                'data': huclyrdir + lyrId + '.geojson'
+            })
+            map.addLayer(
+                {
+                    'id': lyrId,
+                    'type': 'line',
+                    'source': lyrId,
+                    'paint': {
+                        'line-color': '#ffffff',
+                        'line-width': 12 * 12 * 12 * 12 * .5 / Math.pow(parseInt(lyrId.replace('HUC', '')), 4),
+                        'line-opacity': .8
+                    },
+                    'layout': { 'visibility': 'none' } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            )
+            map.addLayer(
+                {
+                    'id': lyrId + '-fill',
+                    'type': 'fill',
+                    'source': lyrId,
+                    'paint': {
+                        'fill-opacity': 0
+                    },
+                    'layout': { 'visibility': 'none' } //on load
+                }
+                // ,'FEMA Severe Repetitive Loss Properties' //add underneath
+            )
+        }
+
+
+
+
             
         legendlyrs.push(
             {
@@ -1339,6 +1376,38 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             }
         )
     })
+
+    // // HUC 8 New
+    // lyrId = 'HUC8 New'
+
+    // map.addSource(lyrId, {
+    //     type: 'vector',
+    //     tiles: [janlayerdir + 'huc8-tiles/{z}/{x}/{y}.pbf'],
+    //     minzoom: 0,
+    //     maxzoom: 10,
+    // });
+    // map.addLayer({
+    //     id: lyrId,
+    //     type: 'line',
+    //     source: lyrId,
+    //     'source-layer': 'TX_HUC8',
+    //     'layout': { 'visibility': 'none' }, //on load
+    //     'paint': {
+    //         'line-color': '#ffffff',
+    //         'line-width': 12 * 12 * 12 * 12 * .5 / Math.pow(parseInt(lyrId.replace('HUC', '')), 4),
+    //         'line-opacity': .8
+    //     },
+    // })
+
+    // legendlyrs.push({
+    //     type: "vector",
+    //     initialColor: "#ffcc66",
+    //     paintPropertyType: "fill-color",
+    //     id: lyrId,
+    //     hidden: false,
+    //     group: "Boundaries",
+    //     directory: "Legend"
+    // })
 
     const fldzonelyrs = ['500YR Preliminary',
         '500YR Effective',
