@@ -1409,11 +1409,51 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     //     directory: "Legend"
     // })
 
-    const fldzonelyrs = ['500YR Preliminary',
+    // TODO: these can't have special chars as they're getting converted to html ids/classes somewhere
+    const fldZoneNameMap = {
+        "AyishBayou_MaxInundationExtent_01pct": "Ayish Bayou Max Inund Ext  1pct",
+        "AyishBayou_MaxInundationExtent_10pct": "Ayish Bayou Max Inund Ext  10pct",
+        "SaltBayou_MaxInundationExtent_01pct": "Salt Bayou Max Inund Ext  1pct",
+        "SaltBayou_MaxInundationExtent_10pct": "Salt Bayou Max Inund Ext  10pct",
+        "SandyCreek_MaxInundationExtent_01pct": "Sandy Creek Max Inund Ext  1pct",
+        "SandyCreek_MaxInundationExtent_10pct": "Sandy Creek Max Inund Ext  10pct",
+        "TaylorBayou_MaxInundationExtent_01pct": "Taylor Bayou Max Inund Ext  1pct",
+        "TaylorBayou_MaxInundationExtent_10pct": "Taylor Bayou Max Inund Ext  10pct",
+        "TenmileCreek_MaxInundationExtent_01pct": "Ten Mile Creek Max Inund Ext  1pct",
+        "TenmileCreek_MaxInundationExtent_10pct": "Ten Mile Creek Max Inund Ext  10pct",
+    }
+
+    const fldzonelyrs = [
+        '500YR Preliminary',
         '500YR Effective',
         '100YR Preliminary',
-        '100YR Effective']
-    let colrs = zip(fldzonelyrs, ['#c36c08', '#c7af0e', '#0000b0', '#5544fd'])
+        '100YR Effective',
+        // 'AyishBayou_10Year',
+        // 'AyishBayou_100Year',
+        "AyishBayou_MaxInundationExtent_01pct",
+        "AyishBayou_MaxInundationExtent_10pct",
+        "SaltBayou_MaxInundationExtent_01pct",
+        "SaltBayou_MaxInundationExtent_10pct",
+        "SandyCreek_MaxInundationExtent_01pct",
+        "SandyCreek_MaxInundationExtent_10pct",
+        "TaylorBayou_MaxInundationExtent_01pct",
+        "TaylorBayou_MaxInundationExtent_10pct",
+        "TenmileCreek_MaxInundationExtent_01pct",
+        "TenmileCreek_MaxInundationExtent_10pct",
+    ]
+let colrs = zip(fldzonelyrs, [
+    '#c36c08', '#c7af0e', '#0000b0', '#5544fd', '#5544fd', '#5544fd',
+    '#003f5c', // dark blue
+    '#2f4b7c', // steel blue
+    '#665191', // slate blue
+    '#43aa8b', // medium teal
+    '#7bb661', // medium green
+    '#a1c349', // yellow-green
+    '#b5d99c', // pale green
+    '#74c476', // medium sea green
+    '#4c9a2a', // forest green
+    '#1f7a8c'  // blue-green
+    ]);
     colrs = Object.fromEntries(colrs)
 
     fldzonelyrs.forEach(lyrId => {
@@ -1421,7 +1461,6 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             'type': 'geojson',
             'data': lyrdir + 'Floodplain/' + lyrId + '.geojson'
         });
-
         map.addLayer({
             'id': lyrId,
             'type': 'fill',
@@ -1432,11 +1471,16 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             },
             'layout': { 'visibility': 'none' } //on load
         });
-        
+        let layerIdOrName = lyrId;
+        if (fldZoneNameMap[lyrId] !== undefined) {
+            layerIdOrName = fldZoneNameMap[lyrId]
+        }
         legendlyrs.push({
             type: "vector",
             initialColor: colrs[lyrId],
             paintPropertyType: "fill-color",
+            // @ts-ignore
+            name: layerIdOrName,
             id: lyrId,
             hidden: false,
             group: "FEMA Floodplain",
@@ -1550,10 +1594,14 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
     // legendlyrs[legendlyrs.map((x)=>x.id).indexOf(replossId+'-point')].group = 'TWDB Critical Infrastructure'
 
     //order layers
-    fldzonelyrs.forEach(lyrId => {
-        map.moveLayer('FEMA ' + lyrId)
-        map.moveLayer('FEMA ' + lyrId + '-point')
-    })
+    // fldzonelyrs.forEach(lyrId => {
+    //     try {
+    //         map.moveLayer('FEMA ' + lyrId)
+    //         map.moveLayer('FEMA ' + lyrId + '-point')
+    //     } catch (e) {
+    //         console.log(e)
+    //     }
+    // })
     map.moveLayer(replossId)
     map.moveLayer(replossId + '-point')
     huclyrs.forEach(lyrId => {
