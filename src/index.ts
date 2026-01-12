@@ -773,6 +773,54 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
         }
     });
 
+    lyrId = 'TIGR Infrastructure Project Sites'
+
+    map.addSource(lyrId + '-src', {
+        type: 'geojson',
+        data: janlayerdir + 'Infrastructure_Project_Sites/TIGR_Infra_Project_Sites.geojson',
+        cluster: true,
+        // clusterMaxZoom: 10, // Max zoom to cluster points on
+        // clusterRadius: 0.0003 // Radius of each cluster when clustering points (defaults to 50)
+    });
+
+    map.addLayer(
+        {
+            'id': lyrId,
+            'type': 'symbol',
+            'source': lyrId + '-src',
+            'layout': {
+                'icon-image': 'custom-marker',
+                'text-field':
+                    ['case', ['has', 'cluster'],
+                        ['to-string', ['get', 'point_count']],
+                        ['get', 'Site Title']
+                    ],
+                'text-font': [
+                    'Open Sans Semibold',
+                    'Arial Unicode MS Bold'
+                ],
+                'text-offset': [0, 1.25],
+                'text-anchor': 'top',
+                'visibility': 'none'
+            }
+            , paint: {
+                "text-color": 'white',
+                'text-halo-width': 2,
+                'text-halo-blur': 1,
+                'text-halo-color': 'black',
+            }
+        }
+    )
+    legendlyrs.push(
+        {
+            type: "symbol",
+            id: lyrId,
+            hidden: false,
+            group: "Mitigation Projects",
+            directory: "Legend"
+        }
+    );
+
     lyrId = 'TWDB FIF Projects'
 
     map.addSource(lyrId + '-src', {
@@ -830,7 +878,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             map.getCanvas().style.cursor = 'pointer';
         }
     })    
-    // test
+
     const lyrz = [
         {
             id: 'Natural Gas Pipelines',
@@ -868,7 +916,7 @@ const loadLayers = async () => { //had to strip out to separate func to reload a
             color: 'darkviolet', 
             grup: "Boundaries",
             lbl: '{Name}'
-        }, 
+        },
         {
             id: 'RPS Project Limits',
             subdir: `layers_jan_2023/${encodeURIComponent('RPS Project Limits')}`,
